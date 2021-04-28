@@ -9,7 +9,7 @@ Output: JSON data with the image link + details, such as
 “pixelation”: 0, 
 “attribution”: “Benh LIEU SONG, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons”
 }
-Other microservices used: Ian's pixelation image transformer
+Other microservices used in this project: Ian's pixelation image transformer
 Used by: Ian
 
 
@@ -17,7 +17,7 @@ Name:
 Description: 
 Input:
 Output:
-Other microservices used:
+Other microservices used in this project:
 Used by:
 
 
@@ -25,7 +25,7 @@ Name:
 Description: 
 Input:
 Output:
-Other microservices used:
+Other microservices used in this project:
 Used by:
 
 
@@ -33,7 +33,7 @@ Name:
 Description: 
 Input:
 Output:
-Other microservices used:
+Other microservices used in this project:
 Used by:
 
 
@@ -41,5 +41,5 @@ Name:
 Description: 
 Input:
 Output:
-Other microservices used:
+Other microservices used in this project:
 Used by:

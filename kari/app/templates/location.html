@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Location - {{ location }}{% endblock %}
+{% block header %}<h2>{{ location }}</h2>{% endblock %}
+
+{% block content %}
+<img class="imgLocMain" src="/static/placeholder.jpg" alt="image coming soon">
+<a class="btnLinkToSubmitPage" href="http://flip3.engr.oregonstate.edu:5432/review">Submit a Review</a>
+
+<table>
+    <tr>
+        <td>Destination Scores</td>
+        <td>Positivity</td>
+        <td>Neutrality</td>
+        <td>Negativity</td>
+        <td>Total Reviews</td>
+    </tr>
+</table>
+
+<div class="scraped_stats">Scraped Stats Go Here</div>
+<div class="scraped_text">{{ locationText }}</div>
+<div class="reviews">Reviews Go Here</div>
+{% endblock %}

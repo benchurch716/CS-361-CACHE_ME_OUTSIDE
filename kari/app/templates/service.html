@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Sentiment/Text Analysis Service{% endblock %}
+{% block header %}<h2>Analyze Text</h2>{% endblock %}
+
+{% block content %}
+<form method="POST" action="/service">
+    {{ form.inputText.label }} {{ form.inputText(size=20) }}
+    <input type="submit" value="Go">
+</form>
+
+{% if displayResults %}
+    <h3>Input Text</h3>
+    <p>{{ txtInput }}</p>
+
+    <h3>Results</h3>
+    <table class="table" id="api_display">
+        <thead>
+            <tr>
+                <th scope="col">Key</th>
+                <th scope="col">Value</th>
+            </tr>
+        </thead>
+        <tbody>
+                <tr>
+                    <td>neg</td>
+                    <td>0.5</td>
+                </tr>
+
+                <tr>
+                    <td>neu</td>
+                    <td>0.5</td>
+                </tr>
+                <tr>
+                    <td>pos</td>
+                    <td>0.5</td>
+                </tr>
+                <tr>
+                    <td>word_count</td>
+                    <td>0.5</td>
+                </tr>
+                <tr>
+                    <td>most_frequent</td>
+                    <td>0.5</td>
+                </tr>
+        </tbody>
+
+    </table>
+
+{% endif %}
+
+
+
+
+
+
+
+
+{% endblock %}

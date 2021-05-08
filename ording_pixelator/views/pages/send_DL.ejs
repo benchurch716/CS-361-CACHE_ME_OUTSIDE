@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {background-color: black;}
+    h1   {
+        color: red;
+        font-family:georgia,garamond,serif;font-size:38px;font-style:bold;
+        margin: auto;
+        text-align: center;
+    }
+    </style>
+  <title>Pixelator</title>
+ </head>
+ <body>
+    <h1>Would you like to Download the image or send it somewhere?</h1>
+    <form action="/restart" method="GET">
+      <select name="choice" id="choice">
+        <option value="send">Send</option>
+        <option value="download">Download</option>
+      </select>
+        <input type="submit" value="Continue" style="font-family:georgia,garamond,serif;font-size:18px;font-style:bold;">
+    </form>
+ </body>
+</html>

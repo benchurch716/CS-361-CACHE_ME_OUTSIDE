@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {background-color: black;}
+    h1   {
+        color: red;
+        font-family:georgia,garamond,serif;font-size:38px;font-style:bold;
+        margin: auto;
+        text-align: center;
+    }
+    div {
+      color: blue;
+    }
+    table {
+      text-align: center;
+      color: blue;
+    }
+    </style>
+  <title>Pixelator</title>
+ </head>
+ <body>
+     <h1>Choose One or All Images</h1>
+     <form action="/send_DL" method="GET">
+        <input type="submit" value="Continue" style="font-family:georgia,garamond,serif;font-size:18px;font-style:bold;">
+    </form>
+    <div>
+      <% data.forEach(function(item){ %>
+        <img style="height: 200px; width: 200px;" src="<%= item.new_image %>">
+      <%});%>
+    </div>
+ </body>
+</html>

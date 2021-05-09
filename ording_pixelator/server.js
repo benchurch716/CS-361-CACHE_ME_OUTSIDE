@@ -29,8 +29,8 @@ app.post("/results", function (req, res) {
     pixel()
     
     var new_image = '/home/ordingi/node_projects/pixel_project/pixelate1.png';
-    var holder = 1;
-    var newItem = {new_image: new_image, holder: holder};
+    var old_image = req.body.imagename;
+    var newItem = {new_image: new_image, old_image: old_image};
     data.push(newItem);
     console.log(new_image);
     res.redirect("/results");

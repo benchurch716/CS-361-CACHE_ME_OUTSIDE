@@ -2,3 +2,4 @@
 /kari/app/.env
 /kari/app/__pycache__
 /kari/app/nltk_data
+/kari/app/app.db

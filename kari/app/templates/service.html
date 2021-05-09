@@ -18,30 +18,48 @@
             <tr>
                 <th scope="col">Key</th>
                 <th scope="col">Value</th>
+                <th scope="col">Description</th>
             </tr>
         </thead>
         <tbody>
-                <tr>
-                    <td>neg</td>
-                    <td>0.5</td>
-                </tr>
+            <tr>
+                <td>sentiment</td>
+                <td>{{ sentiment }}</td>
+                <td>{{ descriptions.get('sentiment') }}</td>
+            </tr>
+            <tr>
+                <td>compound</td>
+                <td>{{ scores.get('compound') }}</td>
+                <td>{{ descriptions.get('compound') }}</td>
+            </tr>
+            <tr>
+                <td>pos</td>
+                <td>{{ scores.get('pos') }}</td>
+                <td>{{ descriptions.get('pos') }}</td>
+            </tr>
 
-                <tr>
-                    <td>neu</td>
-                    <td>0.5</td>
-                </tr>
-                <tr>
-                    <td>pos</td>
-                    <td>0.5</td>
-                </tr>
-                <tr>
-                    <td>word_count</td>
-                    <td>0.5</td>
-                </tr>
-                <tr>
-                    <td>most_frequent</td>
-                    <td>0.5</td>
-                </tr>
+            <tr>
+                <td>neu</td>
+                <td>{{ scores.get('neu') }}</td>
+                <td>{{ descriptions.get('neu') }}</td>
+
+            </tr>
+            <tr>
+                <td>neg</td>
+                <td>{{ scores.get('neg') }}</td>
+                <td>{{ descriptions.get('neg') }}</td>
+
+            </tr>
+            <tr>
+                <td>word_count</td>
+                <td>{{ wordCount }}</td>
+                <td>{{ descriptions.get('word_count') }}</td>
+            </tr>
+            <tr>
+                <td>most_frequent</td>
+                <td>{{ mostFrequent }}</td>
+                <td>{{ descriptions.get('most_frequent') }}</td>
+            </tr>
         </tbody>
 
     </table>

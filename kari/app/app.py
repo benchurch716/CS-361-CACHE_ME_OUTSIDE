@@ -2,6 +2,7 @@ from flask import Flask, request, render_template
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField
 from wtforms.validators import DataRequired
+from nltk import word_tokenize, FreqDist
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import sqlite3
 
@@ -9,15 +10,7 @@ app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 
-# Database
-# db = SQLAlchemy(app)
-
-
-
-
 # Forms
-
-
 class reviewForm(FlaskForm):
     name = StringField('name', validators=[DataRequired()])
     review = TextAreaField('review', validators=[DataRequired()])
@@ -25,6 +18,35 @@ class reviewForm(FlaskForm):
 
 class apiForm(FlaskForm):
     inputText = TextAreaField('input text', validators=[DataRequired()])
+
+
+# Get sentiment of text
+def getSentiment(compound):
+    if not isinstance(compound, float):
+        return 0
+    if compound <= -0.05:
+        return 'negative'
+    elif compound < 0.05:
+        return 'neutral'
+    else:
+        return 'positive'
+
+
+# Get word count of text
+def getWordCount(text):
+    wordList = text.split(' ')
+    count = 0
+    for word in wordList:
+        if word != '':
+            count = count + 1
+    return count
+
+
+# Get Top x most frequent words in the text
+def getMostFrequent(text, count):
+    tokens = word_tokenize(text)
+    frequency = FreqDist(tokens)
+    return frequency.most_common(count)
 
 
 # Placeholder for info from Ben's service (Wikipedia info box scraper)
@@ -131,19 +153,56 @@ def location():
 # Sentiment/Text Analysis GUI
 @app.route('/service', methods=['GET', 'POST'])
 def service():
+
+    form = apiForm()
+
+    # See https://github.com/cjhutto/vaderSentiment for more information on how the
+    # VADER tool (included in nltk library) calculates sentiment analysis scores
+    descriptions = {
+        'neg': 'Proportion of the text that has negative sentiment',
+        'neu': 'Proportion of the text that is neutral',
+        'pos': 'Proportion of the text that has positive sentiment',
+        'compound': 'A normalized, weighted composite score for the text overall. Ranges \
+                    between -1 (most negative) to 1 (most positive)',
+        'sentiment': 'Overall sentiment, based on compound score. Below -0.05 is negative, \
+                    -0.05 to 0.05 is neutral, and greater than 0.05 is positive',
+        'word_count': 'Word Count',
+        'most_frequent': 'Most frequently used words in the text'
+    }
+
     displayResults = False
     txtInput = ''
-    form = apiForm()
+    scores = {
+        'neg': '-',
+        'neu': '-',
+        'pos': '-',
+        'compound': '-' 
+    }
+    sentiment = '-'
+    wordCount = '-'
+    mostFrequent = '-'
+
+
     if request.method == 'POST':
         displayResults = True
         txtInput = form.inputText.data
         scores = SentimentIntensityAnalyzer().polarity_scores(txtInput)
-    return render_template('service.html', nav=nav, serviceUrl=serviceUrl, form=form, displayResults=displayResults, txtInput=txtInput)
+        sentiment = getSentiment(scores.get('compound'))
+        if sentiment == 0:
+            sentiment = 'ERROR'
+        wordCount = getWordCount(txtInput)
+        mostFrequent = getMostFrequent(txtInput, 5)
 
-
-# Note to self - This is what polarity_scores returns:
-# sentiment_dict = \
-#            {"neg": round(neg, 3),
-#             "neu": round(neu, 3),
-#             "pos": round(pos, 3),
-#             "compound": round(compound, 4)}
+    return render_template(
+        'service.html',
+        nav=nav,
+        serviceUrl=serviceUrl,
+        form=form,
+        displayResults=displayResults,
+        txtInput=txtInput,
+        scores=scores,
+        sentiment=sentiment,
+        wordCount=wordCount,
+        mostFrequent=mostFrequent,
+        descriptions=descriptions
+        )

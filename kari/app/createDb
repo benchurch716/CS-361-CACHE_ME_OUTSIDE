@@ -1,0 +1,48 @@
+#! /usr/bin/env python3
+
+import os
+import sqlite3
+
+
+# Create DB file and set up connection
+if os.path.exists('app.db'):
+	os.remove('app.db')
+
+con = sqlite3.connect('app.db')
+cur = con.cursor()
+cur.execute('''PRAGMA foreign_keys = 1''')
+
+# Create Tables
+cur.execute('''CREATE TABLE locations(
+	id integer PRIMARY KEY, 
+	city text NOT NULL, 
+	state text, 
+	country text NOT NULL)''')
+
+cur.execute('''CREATE TABLE reviews(
+	id integer PRIMARY KEY,
+	locationId integer,
+	review text NOT NULL,
+	FOREIGN KEY(locationId) REFERENCES locations(id))''')
+
+# Insert Locations
+locs = [(1, 'Seattle', 'WA', 'United States'),
+		(2, 'Portland', 'OR', 'United States'),
+		(3, 'Grays Point', 'NSW', 'Australia')]
+
+cur.executemany("INSERT INTO locations (id, city, state, country) VALUES (?, ?, ?, ?)", locs)
+
+reviews = [(1, 'This place sux!'),
+			(1, 'I love this place'),
+			(2, 'The restaurants here are great'),
+			(2, 'I had a terrible experience at Jack in the Box'),
+			(3, 'Too hot'),
+			(3, 'Too many birds')]
+
+cur.executemany("INSERT INTO reviews (locationId, review) VALUES (?, ?)", reviews)
+
+con.commit()
+
+con.close()
+
+	 

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Location - {{ location }}{% endblock %}
-{% block header %}<h2>{{ location }}</h2>{% endblock %}
+{% block header %}<h2>{{ city }}</h2>{% endblock %}
 
 {% block content %}
 <img class="imgLocMain" src="/static/placeholder.jpg" alt="image coming soon">
@@ -18,5 +18,5 @@
 
 <div class="scraped_stats">Scraped Stats Go Here</div>
 <div class="scraped_text">{{ locationText }}</div>
-<div class="reviews">Reviews Go Here</div>
+<div class="reviews">{{ reviews }}</div>
 {% endblock %}

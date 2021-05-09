@@ -1,14 +1,15 @@
-<h1>API Documentation<h1>
 <section>
     <h3>The Image Scraper Microservice is also available as a RESTful API.</h3>
-    <p>Simply send a request to the following addres: http://TBDurlgoeshere?searchterm=[your search term]<br>
+    <p>
+        Simply send a request to the following address: <br>
+        <mark>http://flip3.engr.oregonstate.edu:3080/api?searchTerm=[your search term]</mark><br>
         This will get an unpixelated version of the image at its original resolution.
     </p>
     <p>
         Specify additional <b>optional</b> parameters by including:
         <ul>
             <li>
-                width=[integer width in pixels] or height=[integer height in pixels]
+                &width=[integer width in pixels] or &height=[integer height in pixels]
                 <ul>
                     <li>
                         Include only one of the two dimensions (defaults to width if both dimensions are included). The resulting image will be scaled to the specified dimension.
@@ -16,7 +17,7 @@
                 </ul>
             </li>
             <li>
-                pixelation=[integer percentage]
+                &pixelation=[integer percentage]
                 <ul>
                     <li>
                         Specify the percentage of pixelation as 0, 25, 50, 75, or 100. Default is 0 percent.
@@ -27,13 +28,18 @@
         You'll receive a URL to your image in JSON.
     </p>
     <p>
-        For example, request http://TBDurlgoeshere?searchterm=Eiffel%20Tower&width=500 and you'll receive:<br>
+        For example, request <mark>http://flip3.engr.oregonstate.edu:3080/api?searchTerm=apple&width=500</mark> and you'll receive:<br>
         {<br>
-        "url": “https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Tour_Eiffel_Wikimedia_Commons.jpg/500px-Tour_Eiffel_Wikimedia_Commons.jpg”<br>
-        “width”: 500,<br>
-        “height”: 925,<br>
-        “pixelation”: 0,<br>
-        “attribution”: “Benh LIEU SONG, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons”<br>
+            "searchTerm":"apple",<br>
+            "fileName":"Malus_domestica_a1.jpg",<br>
+            "url":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Malus_domestica_a1.jpg/500px-Malus_domestica_a1.jpg",<br>
+            "width":500,<br>
+            "height":373,<br>
+            "descriptionURL":"https://commons.wikimedia.org/wiki/File:Malus_domestica_a1.jpg",<br>
+            "artist":"Opioła Jerzy (Poland)",<br>
+            "licenseShortName":"CC BY 2.5",<br>
+            "title":"Malus domestica a1"<br>
+            "pixelation": 0<br>
         }
     </p>
 </section>

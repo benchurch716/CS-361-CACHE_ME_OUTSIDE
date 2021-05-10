@@ -1,6 +1,6 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, redirect, render_template, abort
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField
+from wtforms import StringField, TextAreaField, SelectField
 from wtforms.validators import DataRequired
 from nltk import word_tokenize, FreqDist
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -11,13 +11,30 @@ app.config.from_pyfile('config.py')
 
 
 # Forms
-class reviewForm(FlaskForm):
-    name = StringField('name', validators=[DataRequired()])
-    review = TextAreaField('review', validators=[DataRequired()])
+class searchForm(FlaskForm):
+    searchText = StringField('Search')
+    actionUrl = '/search_results'
 
+class reviewForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    city = SelectField('City', validators=[DataRequired()])
+    state = SelectField('State')
+    country = SelectField('Country', validators=[DataRequired()])
+    review = TextAreaField('Review', validators=[DataRequired()])
 
 class apiForm(FlaskForm):
-    inputText = TextAreaField('input text', validators=[DataRequired()])
+    inputText = TextAreaField('Input Text', validators=[DataRequired()])
+
+
+# Featured locations for home page
+class FeaturedLoc:
+    def __init__(self, city, state, country):
+        self.city = city
+        self.state = state
+        self.country = country
+        self.img = '/static/placeholder.jpg'
+        self.page = '/location?city=' + city.replace(' ', '%20') + '&state=' \
+            + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
 
 
 # Get sentiment of text
@@ -80,19 +97,94 @@ nav = {
 }
 
 serviceUrl = '/service'
+searchResultsUrl = '/search_results'
 
 
 # Home Page
 @app.route('/')
 def home():
-    return render_template('base.html', nav=nav, serviceUrl=serviceUrl)
+
+    form = searchForm()
+
+    # TODO: Make function to choose random featured locations and retrieve their data
+    #       from DB.
+    # Each location needs city, state, country, img link, page link
+    featuredLocs = [FeaturedLoc('Seattle', 'WA', 'United States'), \
+        FeaturedLoc('Corvallis', 'OR', 'United States'), \
+        FeaturedLoc('Boise', 'ID', 'United States')
+        ]
+    return render_template(
+        'home.html',
+        nav=nav,
+        form=form,
+        serviceUrl=serviceUrl,
+        featuredLocs=featuredLocs
+        )
 
 
 # Submit a Review Page
 @app.route('/review')
 def review():
+
+    # Connect to database and create cursor
+    conn = sqlite3.connect('app.db')
+    cur = conn.cursor()
+
+    # Create form
     form = reviewForm()
+    
+    # Initialize form dropdown choices
+    form.city.choices = []
+    queryResults = cur.execute('SELECT DISTINCT city FROM locations').fetchall()
+    for city in queryResults:
+        form.city.choices.append((city[0], city[0]))
+    form.city.choices.sort()        
+
+    form.state.choices = []
+    queryResults = cur.execute('SELECT DISTINCT state FROM locations').fetchall()
+    for state in queryResults:
+        form.state.choices.append((state[0], state[0]))
+    form.state.choices.sort()
+    #form.state.choices.insert(0, '')        # Insert blank choice, since state is optional
+
+    form.country.choices = []
+    queryResults = cur.execute('SELECT DISTINCT country FROM locations').fetchall()
+    for country in queryResults:
+        form.country.choices.append((country[0], country[0]))
+    form.country.choices.sort()                        
+
     return render_template('review.html', nav=nav, serviceUrl=serviceUrl, form=form)
+
+
+@app.route('/process_submission', methods=['POST'])
+def process():
+
+    form = reviewForm()
+    conn = sqlite3.connect('app.db')
+    cur = conn.cursor()    
+
+    # Retrieve id of location that the user specified
+    city = form.city.data
+    state = form.state.data
+    country = form.country.data
+    locationId = cur.execute('SELECT id FROM locations WHERE city = (?) AND state = (?) \
+        AND country = (?)', (city, state, country)).fetchall()
+    
+    # Check for location validity
+    if locationId == []:
+        print('ERROR: Location with this city/state/country combination not found')
+        abort(404)
+
+    # Add review to database and close connection
+    cur.execute("INSERT INTO reviews (locationId, name, review) VALUES (?, ?, ?)", \
+        (locationId[0], form.name.data, form.review.data))
+    conn.commit()
+    conn.close()
+
+    redirectUrl = '/location?city=' + city.replace(' ', '%20') + '&state=' \
+            + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
+    
+    return redirect(redirectUrl, code=303)
 
 
 # Top 5 Page
@@ -102,7 +194,7 @@ def top():
 
 
 # Search Results Page
-@app.route('/search_results')
+@app.route('/search_results', methods=['GET', 'POST'])
 def search():
     return render_template('search_results.html', nav=nav, serviceUrl=serviceUrl)
 
@@ -114,7 +206,7 @@ def browse():
 
 
 # Location Page
-@app.route('/location')
+@app.route('/location', methods=['GET', 'POST'])
 def location():
 
     infoboxData = dummyInfoboxData
@@ -131,11 +223,17 @@ def location():
 
     # Get locationId based on URL query string parameters
     locationId = cur.execute('SELECT id FROM locations WHERE city = (?)', (city,)).fetchall()
-    print('my thing is: %s' % (locationId[0]), flush=True)
 
-    # Get all reviews for this location
+    # Get all reviews for this location and analyze their sentiment scores
     reviews = cur.execute('SELECT review FROM reviews WHERE locationId = (?)', locationId[0]).fetchall()
-    print('my reviews are: %s' % (tuple(locationId),), flush=True)
+    conn.close()
+    
+    concatReviews = ''
+    for review in reviews:
+        concatReviews = concatReviews + review[0] + ' '
+    print(concatReviews)
+    scores = SentimentIntensityAnalyzer().polarity_scores(concatReviews)
+    reviewCount = len(reviews)
 
     # TODO: Create function to display location name properly
 
@@ -147,9 +245,11 @@ def location():
         infoboxData=infoboxData,
         locationText=locationText,
         submitURL=submitURL,
+        scores=scores,
+        reviewCount=reviewCount,
         reviews=reviews)
 
-()
+
 # Sentiment/Text Analysis GUI
 @app.route('/service', methods=['GET', 'POST'])
 def service():
@@ -167,7 +267,7 @@ def service():
         'sentiment': 'Overall sentiment, based on compound score. Below -0.05 is negative, \
                     -0.05 to 0.05 is neutral, and greater than 0.05 is positive',
         'word_count': 'Word Count',
-        'most_frequent': 'Most frequently used words in the text'
+        'most_frequent': 'Most frequently used words and number of appearances in the text'
     }
 
     displayResults = False
@@ -206,3 +306,8 @@ def service():
         mostFrequent=mostFrequent,
         descriptions=descriptions
         )
+
+    
+@app.errorhandler(404)
+def pageNotFound(e):
+    return render_template('404.html')

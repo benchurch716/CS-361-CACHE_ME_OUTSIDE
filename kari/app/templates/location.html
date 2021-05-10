@@ -4,19 +4,31 @@
 
 {% block content %}
 <img class="imgLocMain" src="/static/placeholder.jpg" alt="image coming soon">
-<a class="btnLinkToSubmitPage" href="http://flip3.engr.oregonstate.edu:5432/review">Submit a Review</a>
+<a class="btnLinkToSubmitPage" href="/review">Submit a Review</a>
 
-<table>
-    <tr>
-        <td>Destination Scores</td>
-        <td>Positivity</td>
-        <td>Neutrality</td>
-        <td>Negativity</td>
-        <td>Total Reviews</td>
-    </tr>
-</table>
+<div class="fullSizeContainer">
+    <table class="locationScores">
+        <tr>
+            <th>Destination Scores:</th>
+            <td>Positivity: {{ scores.get('pos') }}</td>
+            <td>Neutrality: {{ scores.get('neu') }}</td>
+            <td>Negativity: {{ scores.get('neg') }}</td>
+            <td>Total Reviews: {{ reviewCount }}</td>
+        </tr>
+    </table>
+</div>
 
-<div class="scraped_stats">Scraped Stats Go Here</div>
-<div class="scraped_text">{{ locationText }}</div>
-<div class="reviews">{{ reviews }}</div>
+<div class="fullSizeContainer">
+    <h3>About</h3>
+    <h5>[Scraped Stats from Wikipedia scraper service will go here]</h5>
+    <p>{{ locationText }}</p>
+</div>
+
+<div class="fullSizeContainer">
+    <h3>User Reviews</h3>
+    {% for review in reviews %}
+        <p>{{ review[0] }}</p>
+    {% endfor %}
+</div>
+
 {% endblock %}

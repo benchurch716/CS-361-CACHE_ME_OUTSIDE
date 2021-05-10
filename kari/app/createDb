@@ -22,6 +22,7 @@ cur.execute('''CREATE TABLE locations(
 cur.execute('''CREATE TABLE reviews(
 	id integer PRIMARY KEY,
 	locationId integer,
+	name text NOT NULL,
 	review text NOT NULL,
 	FOREIGN KEY(locationId) REFERENCES locations(id))''')
 
@@ -32,17 +33,16 @@ locs = [(1, 'Seattle', 'WA', 'United States'),
 
 cur.executemany("INSERT INTO locations (id, city, state, country) VALUES (?, ?, ?, ?)", locs)
 
-reviews = [(1, 'This place sux!'),
-			(1, 'I love this place'),
-			(2, 'The restaurants here are great'),
-			(2, 'I had a terrible experience at Jack in the Box'),
-			(3, 'Too hot'),
-			(3, 'Too many birds')]
+reviews = [(1, 'Andrew Anderson', 'This place sux!'),
+			(1, 'Bob Bobson', 'I love this place'),
+			(2, 'Cindy Cinderson', 'The restaurants here are great'),
+			(2, 'Danielle Danielson', 'I had a terrible experience at Jack in the Box'),
+			(3, 'Erik Erikson', 'Too hot'),
+			(3, 'Frances Francis', 'Too many birds')]
 
-cur.executemany("INSERT INTO reviews (locationId, review) VALUES (?, ?)", reviews)
+cur.executemany("INSERT INTO reviews (locationId, name, review) VALUES (?, ?, ?)", reviews)
 
 con.commit()
-
 con.close()
 
 	 

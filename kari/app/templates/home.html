@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block header %}Home{% endblock %}
+
+{% block content %}
+
+<div class=homeSearchContainer>
+    <form method="post" action={{ actionUrl }}>
+        {{ form.searchText(size=50) }}
+        <input type="submit" value="Search">
+    </form>
+</div>
+
+
+<div class="featContainer">
+    <h3>Featured Locations</h3>
+    {% for location in featuredLocs %}
+        <div class="featLoc">
+            <h5>{{ location.city }}, {{ location.state }}</h5>
+            <a href={{ location.page }}>
+                <img class="featImg" src={{ location.img }} alt="image coming soon">
+            </a>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

@@ -3,66 +3,73 @@
 {% block header %}<h2>Analyze Text</h2>{% endblock %}
 
 {% block content %}
-<form method="POST" action="/service">
-    {{ form.inputText.label }} {{ form.inputText(size=20) }}
-    <input type="submit" value="Go">
-</form>
+<div class="fullsizeContainer">
+    <form method="POST" action="/service">
+        <h5>Input Text to Analyze:</h5><br>
+        {{ form.inputText }}
+        <input type="submit" value="Go">
+    </form>
+</div>
+
 
 {% if displayResults %}
-    <h3>Input Text</h3>
-    <p>{{ txtInput }}</p>
+    <div class="fullsizeContainer">
+        <h5>Your input was:</h5>
+        <p>{{ txtInput }}</p>
+    </div>
 
-    <h3>Results</h3>
-    <table class="table" id="api_display">
-        <thead>
-            <tr>
-                <th scope="col">Key</th>
-                <th scope="col">Value</th>
-                <th scope="col">Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>sentiment</td>
-                <td>{{ sentiment }}</td>
-                <td>{{ descriptions.get('sentiment') }}</td>
-            </tr>
-            <tr>
-                <td>compound</td>
-                <td>{{ scores.get('compound') }}</td>
-                <td>{{ descriptions.get('compound') }}</td>
-            </tr>
-            <tr>
-                <td>pos</td>
-                <td>{{ scores.get('pos') }}</td>
-                <td>{{ descriptions.get('pos') }}</td>
-            </tr>
-
-            <tr>
-                <td>neu</td>
-                <td>{{ scores.get('neu') }}</td>
-                <td>{{ descriptions.get('neu') }}</td>
-
-            </tr>
-            <tr>
-                <td>neg</td>
-                <td>{{ scores.get('neg') }}</td>
-                <td>{{ descriptions.get('neg') }}</td>
-
-            </tr>
-            <tr>
-                <td>word_count</td>
-                <td>{{ wordCount }}</td>
-                <td>{{ descriptions.get('word_count') }}</td>
-            </tr>
-            <tr>
-                <td>most_frequent</td>
-                <td>{{ mostFrequent }}</td>
-                <td>{{ descriptions.get('most_frequent') }}</td>
-            </tr>
-        </tbody>
-
-    </table>
+    <div class="fullsizeContainer">
+        <h3>Results</h3>
+        <table class="table" id="api_display">
+            <thead>
+                <tr>
+                    <th scope="col">Key</th>
+                    <th scope="col">Value</th>
+                    <th scope="col">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>sentiment</td>
+                    <td>{{ sentiment }}</td>
+                    <td>{{ descriptions.get('sentiment') }}</td>
+                </tr>
+                <tr>
+                    <td>compound</td>
+                    <td>{{ scores.get('compound') }}</td>
+                    <td>{{ descriptions.get('compound') }}</td>
+                </tr>
+                <tr>
+                    <td>pos</td>
+                    <td>{{ scores.get('pos') }}</td>
+                    <td>{{ descriptions.get('pos') }}</td>
+                </tr>
+    
+                <tr>
+                    <td>neu</td>
+                    <td>{{ scores.get('neu') }}</td>
+                    <td>{{ descriptions.get('neu') }}</td>
+    
+                </tr>
+                <tr>
+                    <td>neg</td>
+                    <td>{{ scores.get('neg') }}</td>
+                    <td>{{ descriptions.get('neg') }}</td>
+    
+                </tr>
+                <tr>
+                    <td>word_count</td>
+                    <td>{{ wordCount }}</td>
+                    <td>{{ descriptions.get('word_count') }}</td>
+                </tr>
+                <tr>
+                    <td>most_frequent</td>
+                    <td>{{ mostFrequent }}</td>
+                    <td>{{ descriptions.get('most_frequent') }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
 {% endif %}
 

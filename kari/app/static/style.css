@@ -1,32 +1,69 @@
+body{
+    font-family: 'Lato', sans-serif;
+}
+
+.content{
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+nav{
+    padding-left: 5%;
+}
+
+header{
+    padding-top: 2%;
+}
+
+footer{
+    display: block;
+}
+
+.fullsizeContainer{
+    padding-top: 2%;
+    padding-bottom: 1%;
+}
+
+.siteDispName{
+    padding-top: 2%;
+    font-family: 'Satisfy', cursive;
+    font-size: 3em;
+    color: #ffffff;
+}
+
+.tagline{
+    color: #ffffff;
+}
+
 /* Give nav bar a blue background */
-.main_nav{
+.mainNav{
     background-color: #4895ef;
     overflow: hidden;
   }
   
 /* Style nav bar links */
-.main_nav a {
+.mainNav a {
     float: left;
     color: #ffffff;
     text-align: center;
     padding: 1.5em 2em;
     text-decoration: none;
-    font-size: 1em;
+    font-size: 1.1em;
 }
 
 /* Change link background color on hover */
-.main_nav a:hover {
+.mainNav a:hover {
     background-color: #4361EE;
 }  
 
 /* Style the search box on nav bar */
-.nav_search {
+.navSearch {
     float: left;
     color: #ffffff;
     text-align: center;
     padding: 1.5em 2em;
     text-decoration: none;
-    font-size: 1em;
+    font-size: 1.1em;
 }
 
 /* Style the link to the Submit Review page */
@@ -48,4 +85,28 @@
     border-radius: 0.5em;
     max-width: 30%;
     height: auto;
+}
+
+
+/* Style Home Page Featured Locations */
+.featLoc{
+    width: 30%;
+    display: inline;
+    float: left;
+}
+
+.featImg{
+    width: 100%;
+}
+
+/* Style Sentiment/Text Analysis Page */
+textarea{
+    width: 50%;
+    height: 10em;
+    resize: none;
+}
+
+h6{
+    font-style: italic;
+    font-size: 80%;
 }

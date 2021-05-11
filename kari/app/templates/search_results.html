@@ -1,5 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Title Here{% endblock %}
-{% block header %}<h2>Header here</h2>{% endblock %}
+{% block title %}Search Results{% endblock %}
+{% block header %}<h2>Search Results</h2>{% endblock %}
 
-{% block content %}{% endblock %}
+{% block content %}
+{% for location in results %}
+    <a href="{{ location[4] }}">{{ location[1] }}, 
+    {% if not location[2] == None %}
+        {{location [2] }}, 
+    {% endif %}
+    {{location[3] }}</a>
+{% endfor %}
+{% endblock %}

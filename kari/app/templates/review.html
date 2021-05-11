@@ -1,12 +1,13 @@
 {% extends "base.html" %}
+<script src="static/script.js"></script>
 {% block title %}Submit a Review{% endblock %}
 {% block header %}<h2>Submit a Review</h2>{% endblock %}
 
 {% block content %}
 <form method="POST" action="/process_submission">
-    {{ form.city.label }} {{ form.city }}<br>
+    {{ form.country.label }} {{ form.country(onchange="filterStates()") }}<br>
     {{ form.state.label }} {{ form.state }}<br>
-    {{ form.country.label }} {{ form.country }}<br>
+    {{ form.city.label }} {{ form.city }}<br>
     {{ form.name.label }} {{ form.name }}<br>    
     {{ form.review.label }} {{ form.review }}
     <input type="submit" value="Submit" onclick="return confirm('You\'re about to publish a review. Click Ok to continue.');">

@@ -110,8 +110,8 @@ def home():
     #       from DB.
     # Each location needs city, state, country, img link, page link
     featuredLocs = [FeaturedLoc('Seattle', 'WA', 'United States'), \
-        FeaturedLoc('Corvallis', 'OR', 'United States'), \
-        FeaturedLoc('Boise', 'ID', 'United States')
+        FeaturedLoc('Portland', 'OR', 'United States'), \
+        FeaturedLoc('Grays Point', 'NSW', 'Australia')
         ]
     return render_template(
         'home.html',
@@ -119,7 +119,7 @@ def home():
         form=form,
         serviceUrl=serviceUrl,
         featuredLocs=featuredLocs
-        )
+    )
 
 
 # Submit a Review Page
@@ -153,7 +153,12 @@ def review():
         form.country.choices.append((country[0], country[0]))
     form.country.choices.sort()                        
 
-    return render_template('review.html', nav=nav, serviceUrl=serviceUrl, form=form)
+    return render_template(
+        'review.html',
+        nav=nav,
+        serviceUrl=serviceUrl,
+        form=form
+    )
 
 
 @app.route('/process_submission', methods=['POST'])
@@ -190,19 +195,94 @@ def process():
 # Top 5 Page
 @app.route('/top')
 def top():
-    return render_template('top.html', nav=nav, serviceUrl=serviceUrl)
+    return render_template(
+        'top.html',
+        nav=nav,
+        serviceUrl=serviceUrl
+    )
 
 
 # Search Results Page
 @app.route('/search_results', methods=['GET', 'POST'])
 def search():
-    return render_template('search_results.html', nav=nav, serviceUrl=serviceUrl)
+
+    form = searchForm()
+
+    # Connect to database and create cursor
+    conn = sqlite3.connect('app.db')
+    cur = conn.cursor()
+
+    # Initialize search text
+    searchText = form.searchText.data
+    searchText = '%' + searchText + '%'
+
+    # Override default case-sensitive LIKE
+    cur.execute('PRAGMA case_sensitive_like=OFF')
+    conn.commit()
+
+    # Perform search of cities, states and countries columns
+    # TODO: Make this work with full state name. Currently works only with state abbr.
+    # ie, 'OR' returns a match, whereas 'Oregon' does not    
+    cities = cur.execute( 'SELECT * FROM locations WHERE city LIKE (?)', \
+        (searchText,)).fetchall()
+    states = cur.execute('SELECT * FROM locations WHERE state LIKE (?)', \
+         (searchText,)).fetchall()      
+    countries = cur.execute('SELECT * FROM locations WHERE country LIKE (?)', \
+         (searchText,)).fetchall()
+    
+    # Build results list
+    rawResults = cities + states + countries
+    resultsWithLink = []
+    for locationId, city, state, country in rawResults:
+        url = '/location?city=' + city.replace(' ', '%20') + '&state=' \
+        + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
+        resultsWithLink.append((locationId, city, state, country, url))
+    print(resultsWithLink)
+
+    # TODO: Remove duplicates from list (eg, New York City, New York would appear twice if
+    # searching for 'New York'. This is unwanted behavior.)
+
+    # Reset case-sensitive LIKE back to default, then close db connection
+    cur.execute('PRAGMA case_sensitive_like=ON')
+    conn.commit()                           
+    conn.close()
+
+    return render_template(
+        'search_results.html',
+        results=resultsWithLink,
+        nav=nav,
+        serviceUrl=serviceUrl,
+    )
 
 
 # Browse Page
 @app.route('/browse')
 def browse():
-    return render_template('browse.html', nav=nav, serviceUrl=serviceUrl)
+
+    # Connect to database and create cursor
+    conn = sqlite3.connect('app.db')
+    cur = conn.cursor()
+
+    # Return list of all locations in database
+    locations = cur.execute('SELECT * FROM locations').fetchall()
+
+    # Add link to locations
+    locationsWithLink = []
+    for locationId, city, state, country in locations:
+        url = '/location?city=' + city.replace(' ', '%20') + '&state=' \
+        + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
+        locationsWithLink.append((locationId, city, state, country, url))
+    print(locationsWithLink)
+
+    # Close db connection
+    conn.commit()                           
+    conn.close()
+    
+    return render_template(
+        'browse.html',
+        nav=nav,
+        serviceUrl=serviceUrl,
+        locations=locationsWithLink)
 
 
 # Location Page
@@ -247,7 +327,8 @@ def location():
         submitURL=submitURL,
         scores=scores,
         reviewCount=reviewCount,
-        reviews=reviews)
+        reviews=reviews
+    )
 
 
 # Sentiment/Text Analysis GUI
@@ -305,7 +386,7 @@ def service():
         wordCount=wordCount,
         mostFrequent=mostFrequent,
         descriptions=descriptions
-        )
+    )
 
     
 @app.errorhandler(404)

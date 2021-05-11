@@ -22,13 +22,16 @@
   <title>Pixelator</title>
  </head>
  <body>
-     <h1>Choose One or All Images</h1>
+     <h1>Results of the Pixelization</h1>
      <form action="/send_DL" method="GET">
         <input type="submit" value="Continue" style="font-family:georgia,garamond,serif;font-size:18px;font-style:bold;">
     </form>
     <div>
       <% data.forEach(function(item){ %>
+        <img style="height: 200px; width: 200px;" src="<%= item.old_image %>">
+        <div>Old Image</div>
         <img style="height: 200px; width: 200px;" src="<%= item.new_image %>">
+        <div>New Image</div>
       <%});%>
     </div>
  </body>

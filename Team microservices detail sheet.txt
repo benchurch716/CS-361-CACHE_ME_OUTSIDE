@@ -3,14 +3,19 @@ Description: Wikipedia Image Scraper
 Input: A query URL, such as http://TBDurlgoeshere?searchterm=Eiffel%20Tower&width=500&pixelation=0
 Output: JSON data with the image link + details, such as 
 {
-“url”: “https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Tour_Eiffel_Wikimedia_Commons.jpg/500px-Tour_Eiffel_Wikimedia_Commons.jpg”, 
-“width”: 500, 
-“height”: 925, 
-“pixelation”: 0, 
-“attribution”: “Benh LIEU SONG, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons”
+"searchTerm":"apple",
+"fileName":"Malus_domestica_a1.jpg",
+"url":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Malus_domestica_a1.jpg/500px-Malus_domestica_a1.jpg",
+"width":500,
+"height":373,
+"descriptionURL":"https://commons.wikimedia.org/wiki/File:Malus_domestica_a1.jpg",
+"artist":"Opioła Jerzy (Poland)",
+"licenseShortName":"CC BY 2.5",
+"title":"Malus domestica a1",
+"pixelation": 0
 }
 Other microservices used in this project: Ian's pixelation image transformer
-Used by: Ian
+Used by: Ian, Kari
 
 
 Name: Kari

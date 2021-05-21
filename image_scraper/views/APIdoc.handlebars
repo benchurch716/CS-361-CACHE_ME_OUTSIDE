@@ -2,7 +2,7 @@
     <h3>The Image Scraper Microservice is also available as a RESTful API.</h3>
     <p>
         Simply send a request to the following address: <br>
-        <mark>http://flip3.engr.oregonstate.edu:3080/api?searchTerm=[your search term]</mark><br>
+        <mark>http://flip3.engr.oregonstate.edu:3081/api?searchTerm=[your search term]</mark><br>
         This will get an unpixelated version of the image at its original resolution.
     </p>
     <p>
@@ -17,10 +17,10 @@
                 </ul>
             </li>
             <li>
-                &pixelation=[integer percentage]
+                &pixelation=[integer from 0 to 199]
                 <ul>
                     <li>
-                        Specify the percentage of pixelation as 0, 25, 50, 75, or 100. Default is 0 percent.
+                        Setting this to 0 will result in no pixelation while 199 will produce an extremely pixelated image. The default setting is 0.
                     </li>
                 </ul>
             </li>
@@ -28,7 +28,7 @@
         You'll receive a URL to your image in JSON.
     </p>
     <p>
-        For example, request <mark>http://flip3.engr.oregonstate.edu:3080/api?searchTerm=apple&width=500</mark> and you'll receive:<br>
+        For example, request <mark>http://flip3.engr.oregonstate.edu:3081/api?searchTerm=apple&width=500</mark> and you'll receive:<br>
         {<br>
             "searchTerm":"apple",<br>
             "fileName":"Malus_domestica_a1.jpg",<br>

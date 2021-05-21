@@ -23,14 +23,9 @@
             </div>
             <p></p>
             <div class="row">
-                <div class="col">Need to obscure this image? Select a level of pixelation from the dropdown menu:
-                    <select class="form-select" aria-label="Default select example" name="pixelation">
-                        <option value="0" selected>0% pixelated</option>
-                        <option value="25">25% pixelated</option>
-                        <option value="50">50% pixelated</option>
-                        <option value="75">75% pixelated</option>
-                        <option value="100">100% pixelated</option>
-                    </select>
+                <div class="col">Need to obscure this image? 
+                    <label for="pixelation" class="form-label">Move the slider to select a level of pixelation</label>
+                    <input type="range" class="form-range" min="0" max="199" value="0" id="pixelation" name="pixelation">
                 </div>
                 <div class="col"></div>
             </div>
@@ -44,9 +39,12 @@
 <section>
     <h3>How it works</h3>
     <p>
-        Given a search term, the Image Scraper gets “the single most appropriate thumbnail associated with [a Wikipedia] article”, in part by using 
-        the PageImages property of MediaWiki’s API: https://www.mediawiki.org/wiki/Extension:PageImages. Image pixelation is provided by Ian Ording’s 
-        Image Transformer Microservice. The Image Scraper will then display the requested image and its attribution details for you to download. 
+        Given a search term, the Image Scraper gets “the single most appropriate thumbnail associated with [a Wikipedia] article”, 
+        in part by using the PageImages property of MediaWiki’s API: 
+        <a href="https://www.mediawiki.org/wiki/Extension:PageImages">https://www.mediawiki.org/wiki/Extension:PageImages</a>. 
+        Image pixelation is provided by Ian Ording’s Image Transformer Microservice 
+        (found here at <a href="https://image-pixelatorio.herokuapp.com/">https://image-pixelatorio.herokuapp.com/</a>). 
+        The Image Scraper will then display the requested image and its attribution details for you to download. 
     </p>
     <p><b>Note: </b>This service will only return free images, such as those under the Creative Commons licence.</p>
     <p></p>

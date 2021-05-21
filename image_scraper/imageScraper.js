@@ -8,8 +8,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
-app.set('port', 3080);
+app.set('port', 3081);
 app.use('/static', express.static('public'));
+
 
 /* 
 Sets context key/value pairs for the image url, width, height, description url, artist, license, and title.
@@ -40,12 +41,14 @@ async function setValuesWithImageInfo(context, data) {
   }
 }
 
+
 // Home page
 app.get('/', function (req, res, next) {
   var context = {};
   context.pageTitle = "Image Scraper Microservice GUI";
   res.render('Home', context);
 });
+
 
 // Displays the image result
 app.get('/result', function (req, res, next) {
@@ -54,12 +57,14 @@ app.get('/result', function (req, res, next) {
   res.render('Result', context);
 });
 
+
 // Informs the user that no free images were found
 app.get('/noresult', function (req, res, next) {
   var context = {};
   context.pageTilte = "Image Scraper Microservice GUI - No Results";
   res.render('NoResult', context);
 });
+
 
 // Image Scraper API documentation
 app.get('/apidoc', function (req, res, next) {
@@ -68,17 +73,87 @@ app.get('/apidoc', function (req, res, next) {
   res.render('APIdoc', context);
 });
 
+
 // Queries to this address will deliver JSON data of the specified image
 app.get('/api', function (req, res, next) {
   var context = {};
   var urlString;
   var urlImageInfo = "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=imageinfo&iiprop=url|extmetadata|user|size&titles=File:";
   var urlPageImages = "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&pilicense=free&titles=";
+  var urlPixelator = "https://image-pixelatorio.herokuapp.com/api";
+  var pixelatorBody = {};
   var pageid;
   var noImageFound = false;
   var q = req.query;
+
   context.searchTerm = q.searchTerm;
-  fetch(urlPageImages+context.searchTerm) // Queries the Wikipedia API to get the file name of the specified subject
+  if (q.pixelation) {
+    if (q.pixelation > 199) {
+      context.pixelation = 199;
+    } else if (q.pixelation < 0) {
+      context.pixelation = 0;
+    } else {
+      context.pixelation = q.pixelation;
+    }
+  } else {
+    context.pixelation = 0
+  }
+
+    /* 
+  If no pixelation is requested:
+    1. Use the search term to get the right image from Wikipedia
+    2. Then use the image file name to get more information about that image from Wikipedia
+    3. Then send the results
+  */
+  if (context.pixelation <= 0) {
+    fetch(urlPageImages+context.searchTerm) // Queries the Wikipedia API to get the file name of the specified subject
+      .then((res) => res.json())
+      .then((data) => {
+        pageid = Object.keys(data.query.pages)
+        if (pageid == -1 || !data.query.pages[pageid].thumbnail) { // In this case, no free images of the specifed subject were found
+          noImageFound = true;
+          context.noResult = "Could not find any free images of the specified search term";
+          throw new Error('No free image results'); // Throws an error and goes straight to 'catch'
+        } else {
+          context.fileName = data.query.pages[pageid].pageimage
+        }      
+      })
+      .then(result => {
+        if (q.width) { // Width was specified
+          urlString = urlImageInfo+context.fileName+"&iiurlwidth="+q.width;
+        }
+        else if (q.height) { // Only height was specified (defaults to width if both dimensions are specified)
+          urlString = urlImageInfo+context.fileName+"&iiurlheight="+q.height;
+        } else {  // No size was specified
+          urlString = urlImageInfo+context.fileName;
+        }
+      })
+      .then(result => fetch(urlString)) // Fetch the image info properties using the file name
+      .then((res) => res.json())
+      .then((data) => setValuesWithImageInfo(context, data))  // Use this data to set the rest of the context properties
+      .then((data) => {
+        context = data;
+        res.json(context);  // Send JSON data with the image results
+      })
+      .catch((error) => {
+        console.log("Something went wrong with the /result post request", error);
+        if (noImageFound == true) {
+          res.json(context);  // Send JSON data informing the user that no free images were found
+        } else {
+          next(error)
+        }
+        return;
+      })
+  }
+  /* 
+  If pixelation is requested:
+    1. Use the search term to get the right image from Wikipedia
+    2. Then use the image file name to get more information about that image (including the url) from Wikipedia
+    3. Then use the image url to get a new url from the image transforming service
+    4. Then send the results
+  */
+  else {
+    fetch(urlPageImages+context.searchTerm) // Queries the Wikipedia API to get the file name of the specified subject
     .then((res) => res.json())
     .then((data) => {
       pageid = Object.keys(data.query.pages)
@@ -105,12 +180,19 @@ app.get('/api', function (req, res, next) {
     .then((data) => setValuesWithImageInfo(context, data))  // Use this data to set the rest of the context properties
     .then((data) => {
       context = data;
-      if (q.pixelation) {
-        context.pixelation = q.pixelation;
-        // CODE TO HANDLE PIXELATION GOES HERE
-      } else {
-        context.pixelation = 0;
-      }
+      pixelatorBody = {  // Create the request body to send to the pixelator
+        urlString: context.url,
+        pix_amount: context.pixelation
+      } 
+    })
+    .then(result => fetch(urlPixelator, {  // Send the pixelator a post request with the parameters in the body
+      method: "POST",
+      body: JSON.stringify(pixelatorBody),
+      headers: {"Content-type": "application/json; charset=UTF-8"}
+    }))
+    .then((res) => res.json())
+    .then((data) => {
+      context.url = data.new_url;  // Replace the image url with the new url pointing to the pixelated version
       res.json(context);  // Send JSON data with the image results
     })
     .catch((error) => {
@@ -122,7 +204,9 @@ app.get('/api', function (req, res, next) {
       }
       return;
     })
+  }
 });
+
 
 // Displays the image results and associated details
 app.post('/result', function (req, res, next) {
@@ -130,12 +214,68 @@ app.post('/result', function (req, res, next) {
   var urlString;
   var urlImageInfo = "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=imageinfo&iiprop=url|extmetadata|user|size&titles=File:";
   var urlPageImages = "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&pilicense=free&titles=";
+  var urlPixelator = "https://image-pixelatorio.herokuapp.com/api";
+  var pixelatorBody = {};
   var pageid;
   var noImageFound = false;
   var b = req.body;
   context.searchTerm = b.searchTerm;
   context.pixelation = b.pixelation;
-  fetch(urlPageImages+context.searchTerm) // Queries the Wikipedia API to get the file name of the specified subject
+
+  /* 
+  If no pixelation is requested:
+    1. Use the search term to get the right image from Wikipedia
+    2. Then use the image file name to get more information about that image from Wikipedia
+    3. Then render the results
+  */
+  if (context.pixelation <= 0) {
+    fetch(urlPageImages+context.searchTerm) // Queries the Wikipedia API to get the file name of the specified subject
+      .then((res) => res.json())
+      .then((data) => {
+        pageid = Object.keys(data.query.pages)
+        if (pageid == -1 || !data.query.pages[pageid].thumbnail) { // In this case, no free images of the specifed subject were found
+          noImageFound = true;
+          throw new Error('No free image results'); // Throws an error and goes straight to 'catch'
+        } else {
+          context.fileName = data.query.pages[pageid].pageimage
+        }      
+      })
+      .then(result => {
+        if (b.width) { // Width was specified
+          urlString = urlImageInfo+context.fileName+"&iiurlwidth="+b.width;
+        }
+        else if (req.body.height) { // Only height was specified (defaults to width if both dimensions are specified)
+          urlString = urlImageInfo+context.fileName+"&iiurlheight="+b.height;
+        } else {  // No size was specified
+          urlString = urlImageInfo+context.fileName;
+        }
+      })
+      .then(result => fetch(urlString)) // Fetch the image info properties using the file name
+      .then((res) => res.json())
+      .then((data) => setValuesWithImageInfo(context, data))  // Use this data to set the rest of the context properties
+      .then((data) => {
+        context = data;
+      res.render('Result', context);  // Display the resulting image and its associated information
+      })
+      .catch((error) => {
+        console.log("Something went wrong with the /result post request", error);
+        if (noImageFound == true) {
+          res.render('NoResult', context);  // Inform the user that no images were found
+        } else {
+          next(error)
+        }
+        return;
+      })
+  } 
+    /* 
+  If pixelation is requested:
+    1. Use the search term to get the right image from Wikipedia
+    2. Then use the image file name to get more information about that image (including the url) from Wikipedia
+    3. Then use the image url to get a new url from the image transforming service
+    4. Then render the results
+  */
+  else {
+    fetch(urlPageImages+context.searchTerm) // Queries the Wikipedia API to get the file name of the specified subject
     .then((res) => res.json())
     .then((data) => {
       pageid = Object.keys(data.query.pages)
@@ -161,12 +301,19 @@ app.post('/result', function (req, res, next) {
     .then((data) => setValuesWithImageInfo(context, data))  // Use this data to set the rest of the context properties
     .then((data) => {
       context = data;
-      if (b.pixelation) {
-        context.pixelation = b.pixelation;
-        // CODE TO HANDLE PIXELATION GOES HERE
-      } else {
-        context.pixelation = 0;
+      pixelatorBody = {  // Create the request body to send to the pixelator
+        urlString: context.url,
+        pix_amount: context.pixelation
       }
+    })
+    .then(result => fetch(urlPixelator, {  // Send the pixelator a post request with the parameters in the body
+      method: "POST",
+      body: JSON.stringify(pixelatorBody),
+      headers: {"Content-type": "application/json; charset=UTF-8"}
+    }))
+    .then((res) => res.json())
+    .then((data) => {
+      context.url = data.new_url;  // Replace the image url with the new url pointing to the pixelated version
       res.render('Result', context);  // Display the resulting image and its associated information
     })
     .catch((error) => {
@@ -178,6 +325,7 @@ app.post('/result', function (req, res, next) {
       }
       return;
     })
+  }
 });
 
 app.use(function (req, res) {

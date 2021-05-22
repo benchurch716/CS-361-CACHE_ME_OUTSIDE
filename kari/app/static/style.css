@@ -16,7 +16,10 @@ header{
 }
 
 footer{
-    display: block;
+    position: absolute;
+    bottom: 4em;
+    margin: auto;
+    width: 50%;    
 }
 
 .fullsizeContainer{

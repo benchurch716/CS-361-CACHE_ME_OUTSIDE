@@ -1,10 +1,13 @@
-from flask import Flask, request, redirect, render_template, abort
+from flask import Flask, request, redirect, render_template, abort, make_response, jsonify
+from flask.wrappers import Response
+from werkzeug.exceptions import HTTPException
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SelectField
 from wtforms.validators import DataRequired
-from nltk import word_tokenize, FreqDist
+from nltk import word_tokenize, FreqDist, RegexpTokenizer
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import sqlite3
+import string
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -61,7 +64,10 @@ def getWordCount(text):
 
 # Get Top x most frequent words in the text
 def getMostFrequent(text, count):
-    tokens = word_tokenize(text)
+    #tokens = word_tokenize(text)
+    #tokens = word_tokenize(text.translate(dict.fromkeys(string.punctuation)))
+    tokenizer = RegexpTokenizer(r'[A-Za-z]+')
+    tokens = tokenizer.tokenize(text)
     frequency = FreqDist(tokens)
     return frequency.most_common(count)
 
@@ -182,7 +188,7 @@ def process():
 
     # Add review to database and close connection
     cur.execute("INSERT INTO reviews (locationId, name, review) VALUES (?, ?, ?)", \
-        (locationId[0], form.name.data, form.review.data))
+        (locationId[0][0], form.name.data, form.review.data))
     conn.commit()
     conn.close()
 
@@ -315,6 +321,11 @@ def location():
     scores = SentimentIntensityAnalyzer().polarity_scores(concatReviews)
     reviewCount = len(reviews)
 
+    for item in reviews:
+        print(item)
+
+    reviews.reverse()
+
     # TODO: Create function to display location name properly
 
     return render_template(
@@ -388,7 +399,42 @@ def service():
         descriptions=descriptions
     )
 
-    
+
+# Error handler for GUI
 @app.errorhandler(404)
 def pageNotFound(e):
     return render_template('404.html')
+
+
+# API implementation    
+@app.route('/api', methods=['GET', 'POST'])
+def api():
+
+    # Check for request type, content type
+    if request.method == 'GET':
+        return make_response({'error': 'Method Not Allowed'}, 405)
+    if request.content_type != 'application/json':
+        return make_response({'error': 'Unsupported Media Type'}, 415)
+
+    else:
+        # Check for request body in correct format
+        try:
+            txtInput = request.json['text']
+        except:
+            return make_response({'error': 'Bad Request'}, 400)
+
+        # Create API response
+        scores = SentimentIntensityAnalyzer().polarity_scores(txtInput)
+        sentiment = getSentiment(scores.get('compound'))
+        if sentiment == 0:
+            sentiment = 'ERROR'
+        wordCount = getWordCount(txtInput)
+        mostFrequent = getMostFrequent(txtInput, 5)
+        return jsonify(sentiment=sentiment,
+                        compound=scores.get('compound'),
+                        pos=scores.get('pos'),
+                        neu=scores.get('neu'),
+                        neg=scores.get('neg'),
+                        wordCount=wordCount,
+                        mostFrequent=mostFrequent,
+                        )

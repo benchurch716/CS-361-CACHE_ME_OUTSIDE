@@ -72,15 +72,6 @@ def getMostFrequent(text, count):
     return frequency.most_common(count)
 
 
-# Placeholder for info from Ben's service (Wikipedia info box scraper)
-dummyInfoboxData = {
-    'Population': '898,553',
-    'Area': '225.08 sq mi',
-    'Elevation': '902 ft',
-    'Demonym(s)': 'Columbusite',
-    'Time Zone': 'UTC-5 (EST)'
-}
-
 # Placeholder for info from Judy's service (Wikipedia text scraper)
 wikiText = {
         'text': """The city of Columbus was named after 15th-century Italian explorer
@@ -295,7 +286,6 @@ def browse():
 @app.route('/location', methods=['GET', 'POST'])
 def location():
 
-    infoboxData = dummyInfoboxData
     locationText = wikiText.get('text')
     submitURL = nav.get('Submit a Review')
 
@@ -333,7 +323,6 @@ def location():
         nav=nav,
         serviceUrl=serviceUrl,
         city=city,
-        infoboxData=infoboxData,
         locationText=locationText,
         submitURL=submitURL,
         scores=scores,

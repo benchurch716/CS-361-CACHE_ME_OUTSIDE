@@ -6,8 +6,10 @@ from wtforms import StringField, TextAreaField, SelectField
 from wtforms.validators import DataRequired
 from nltk import word_tokenize, FreqDist, RegexpTokenizer
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from json import dumps, loads
 import sqlite3
 import string
+import requests
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -64,26 +66,21 @@ def getWordCount(text):
 
 # Get Top x most frequent words in the text
 def getMostFrequent(text, count):
-    #tokens = word_tokenize(text)
-    #tokens = word_tokenize(text.translate(dict.fromkeys(string.punctuation)))
     tokenizer = RegexpTokenizer(r'[A-Za-z]+')
     tokens = tokenizer.tokenize(text)
     frequency = FreqDist(tokens)
     return frequency.most_common(count)
 
 
-# Placeholder for info from Judy's service (Wikipedia text scraper)
-wikiText = {
-        'text': """The city of Columbus was named after 15th-century Italian explorer
-				Christopher Columbus at the city's founding in 1812.[12] It is the largest
-				city in the world named for the explorer, who sailed to and settled parts
-				of the Americas on behalf of Isabella I of Castille and Spain. Although no
-				reliable history exists as to why Columbus, who had no connection to the
-				city or state of Ohio before the city's founding, was chosen as the name
-				for the city, the book Columbus: The Story of a City indicates a state
-				lawmaker and local resident admired the explorer enough to persuade other
-				lawmakers to name the settlement Columbus."""
-}
+# Get search term for a given location
+def getWikiSearchTerm(id):
+    conn = sqlite3.connect('app.db')
+    cur = conn.cursor()
+    print('id is : ' + str(id), flush=True)
+    searchTerm = cur.execute('SELECT searchTerm FROM locations WHERE id = (?)', id).fetchall()
+    conn.close()
+    return searchTerm
+
 
 # Navigation Bar - Label : Route
 nav = {
@@ -265,7 +262,7 @@ def browse():
 
     # Add link to locations
     locationsWithLink = []
-    for locationId, city, state, country in locations:
+    for locationId, city, state, country, searchTerm in locations:
         url = '/location?city=' + city.replace(' ', '%20') + '&state=' \
         + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
         locationsWithLink.append((locationId, city, state, country, url))
@@ -282,11 +279,20 @@ def browse():
         locations=locationsWithLink)
 
 
+# Call Judy's service and get location text
+def getLocationText(searchTerm):
+    url = 'http://flip3.engr.oregonstate.edu:2405/api'
+    jsonObj = {}
+    jsonObj['wiki'] = searchTerm
+    responseBody = requests.post(url, json=jsonObj).text
+    locationText = loads(responseBody)['summary']
+    return locationText
+
+
 # Location Page
 @app.route('/location', methods=['GET', 'POST'])
 def location():
 
-    locationText = wikiText.get('text')
     submitURL = nav.get('Submit a Review')
 
     city = request.args.get('city')
@@ -298,10 +304,10 @@ def location():
     cur = conn.cursor()
 
     # Get locationId based on URL query string parameters
-    locationId = cur.execute('SELECT id FROM locations WHERE city = (?)', (city,)).fetchall()
+    locationId = cur.execute('SELECT id FROM locations WHERE city = (?)', (city,)).fetchall()[0]
 
     # Get all reviews for this location and analyze their sentiment scores
-    reviews = cur.execute('SELECT review FROM reviews WHERE locationId = (?)', locationId[0]).fetchall()
+    reviews = cur.execute('SELECT review FROM reviews WHERE locationId = (?)', locationId).fetchall()
     conn.close()
     
     concatReviews = ''
@@ -314,9 +320,14 @@ def location():
     for item in reviews:
         print(item)
 
+    # TODO: Fix this
     reviews.reverse()
 
     # TODO: Create function to display location name properly
+
+    # Get text from Judy's service
+    searchTerm = getWikiSearchTerm(locationId)
+    locationText = getLocationText(searchTerm)
 
     return render_template(
         'location.html',
@@ -327,7 +338,7 @@ def location():
         submitURL=submitURL,
         scores=scores,
         reviewCount=reviewCount,
-        reviews=reviews
+        reviews=reviews,
     )
 
 

@@ -99,7 +99,9 @@ footer{
 }
 
 .featImg{
-    width: 100%;
+    border-radius: 0.5em;    
+    width: 90%;
+    object-fit: cover;
 }
 
 /* Style Sentiment/Text Analysis Page */

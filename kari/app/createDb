@@ -34,8 +34,8 @@ cur.execute('''CREATE TABLE stateAbbrs(
 	country text NOT NULL)''')	
 
 # Insert Locations
-locs = [(1, 'Seattle', 'WA', 'United States', 'Seattle'),
-		(2, 'Portland', 'OR', 'United States', 'Portland, Oregon'),
+locs = [(1, 'Redmond', 'WA', 'United States', 'Redmond, Washington'),
+		(2, 'Corvallis', 'OR', 'United States', 'Corvallis, Oregon'),
 		(3, 'Grays Point', 'NSW', 'Australia', 'Grays Point, New South Wales')]
 cur.executemany("INSERT INTO locations (id, city, state, country, searchTerm) VALUES (?, ?, ?, ?, ?)", \
 	locs)

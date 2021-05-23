@@ -6,10 +6,9 @@ from wtforms import StringField, TextAreaField, SelectField
 from wtforms.validators import DataRequired
 from nltk import word_tokenize, FreqDist, RegexpTokenizer
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from json import dumps, loads
 import sqlite3
 import string
-import requests
+from wiki import *
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -103,10 +102,21 @@ def home():
     # TODO: Make function to choose random featured locations and retrieve their data
     #       from DB.
     # Each location needs city, state, country, img link, page link
-    featuredLocs = [FeaturedLoc('Seattle', 'WA', 'United States'), \
-        FeaturedLoc('Portland', 'OR', 'United States'), \
+    featuredLocs = [FeaturedLoc('Redmond', 'WA', 'United States'), \
+        FeaturedLoc('Corvallis', 'OR', 'United States'), \
         FeaturedLoc('Grays Point', 'NSW', 'Australia')
         ]
+
+    for loc in featuredLocs:
+
+        conn = sqlite3.connect('app.db')
+        cur = conn.cursor()
+
+        # Get locationId based on URL query string parameters
+        locationId = cur.execute('SELECT id FROM locations WHERE city = (?)', (loc.city,)).fetchall()[0]        
+        searchTerm = getWikiSearchTerm(locationId)
+        loc.img = getImgUrl(searchTerm)
+
     return render_template(
         'home.html',
         nav=nav,
@@ -279,16 +289,6 @@ def browse():
         locations=locationsWithLink)
 
 
-# Call Judy's service and get location text
-def getLocationText(searchTerm):
-    url = 'http://flip3.engr.oregonstate.edu:2405/api'
-    jsonObj = {}
-    jsonObj['wiki'] = searchTerm
-    responseBody = requests.post(url, json=jsonObj).text
-    locationText = loads(responseBody)['summary']
-    return locationText
-
-
 # Location Page
 @app.route('/location', methods=['GET', 'POST'])
 def location():
@@ -313,21 +313,18 @@ def location():
     concatReviews = ''
     for review in reviews:
         concatReviews = concatReviews + review[0] + ' '
-    print(concatReviews)
     scores = SentimentIntensityAnalyzer().polarity_scores(concatReviews)
     reviewCount = len(reviews)
-
-    for item in reviews:
-        print(item)
 
     # TODO: Fix this
     reviews.reverse()
 
     # TODO: Create function to display location name properly
 
-    # Get text from Judy's service
+    # Get information from Wikipedia scraper services
     searchTerm = getWikiSearchTerm(locationId)
     locationText = getLocationText(searchTerm)
+    imgUrl = getImgUrl(searchTerm)
 
     return render_template(
         'location.html',
@@ -339,6 +336,7 @@ def location():
         scores=scores,
         reviewCount=reviewCount,
         reviews=reviews,
+        imgUrl=imgUrl
     )
 
 

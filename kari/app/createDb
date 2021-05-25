@@ -36,7 +36,8 @@ cur.execute('''CREATE TABLE stateAbbrs(
 # Insert Locations
 locs = [(1, 'Redmond', 'WA', 'United States', 'Redmond, Washington'),
 		(2, 'Corvallis', 'OR', 'United States', 'Corvallis, Oregon'),
-		(3, 'Grays Point', 'NSW', 'Australia', 'Grays Point, New South Wales')]
+		(3, 'Grays Point', 'NSW', 'Australia', 'Grays Point, New South Wales'),
+		(4, 'Zzyzx', 'CA', 'United States', 'Zzyzx, California')]
 cur.executemany("INSERT INTO locations (id, city, state, country, searchTerm) VALUES (?, ?, ?, ?, ?)", \
 	locs)
 
@@ -46,13 +47,17 @@ reviews = [(1, 'Andrew Anderson', 'This place sux!'),
 			(2, 'Cindy Cinderson', 'The restaurants here are great'),
 			(2, 'Danielle Danielson', 'I had a terrible experience at Jack in the Box'),
 			(3, 'Erik Erikson', 'Too hot'),
-			(3, 'Frances Francis', 'Too many birds')]
+			(3, 'Frances Francis', 'Too many birds'),
+			(4, 'George George', 'Great scenery'),
+			(4, 'Hanna Hansen', 'Not much to do. I didn\'t enjoy it')
+			]
 cur.executemany("INSERT INTO reviews (locationId, name, review) VALUES (?, ?, ?)", \
 	reviews)
 
 # Insert State Abbreviations
 abbrs = [('WA', 'Washington', 'United States'),
 		('OR', 'Oregon', 'United States'),
+		('CA', 'California', 'United States'),
 		('NSW', 'New South Wales', 'Australia')]
 cur.executemany("INSERT INTO stateAbbrs (nameAbbr, nameLong, country) VALUES (?, ?, ?)", \
 	abbrs)

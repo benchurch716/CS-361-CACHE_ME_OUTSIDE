@@ -4,6 +4,7 @@
 {% block header %}<h2>Submit a Review</h2>{% endblock %}
 
 {% block content %}
+<p>Note: You'll still be able to edit or delete this review after publishing.</p>
 <form method="POST" action="/process_submission">
     {{ form.country.label }} {{ form.country(onchange="filterStates()") }}<br>
     {{ form.state.label }} {{ form.state }}<br>

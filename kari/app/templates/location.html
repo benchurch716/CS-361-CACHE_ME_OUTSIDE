@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Location - {{ location }}{% endblock %}
+{% block script %}<script src="{{url_for('static', filename='script.js')}}"></script>{% endblock %}
+{% block title %}Location - {{ city }}{% endblock %}
 {% block header %}<h2>{{ city }}</h2>{% endblock %}
 
 {% block content %}
@@ -26,7 +27,12 @@
 <div class="fullSizeContainer">
     <h3>User Reviews</h3>
     {% for review in reviews %}
-        <p>{{ review[0] }}</p>
+    <p id="container_review{{ review[2] }}">
+        <span id="reviewText{{ review[2] }}">{{ review[0] }}</span>
+        <span id="reviewUser{{ review[2] }}">{{ review[1] }}</span>
+        <button onclick="editReview({{ review[2] }})">edit</button>
+        <button onclick="deleteReview({{ review[2] }})">delete</button>
+    </p>
     {% endfor %}
 </div>
 

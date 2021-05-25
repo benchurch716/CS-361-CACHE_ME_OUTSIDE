@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, abort, make_response, jsonify
+from flask import Flask, request, redirect, render_template, abort, make_response, jsonify, url_for
 from flask.wrappers import Response
 from werkzeug.exceptions import HTTPException
 from flask_wtf import FlaskForm
@@ -21,8 +21,8 @@ class searchForm(FlaskForm):
 
 class reviewForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
-    city = SelectField('City', validators=[DataRequired()])
-    state = SelectField('State')
+    city = SelectField('City', validators=[DataRequired()], validate_choice=False)
+    state = SelectField('State', validate_choice=False)
     country = SelectField('Country', validators=[DataRequired()])
     review = TextAreaField('Review', validators=[DataRequired()])
 
@@ -84,8 +84,7 @@ def getWikiSearchTerm(id):
 # Navigation Bar - Label : Route
 nav = {
     'Home': '/',
-    'Top': '/top',
-    'Browse': '/browse',
+    'Browse Locations': '/browse',
     'Submit a Review': '/review'
 }
 
@@ -165,6 +164,7 @@ def review():
     )
 
 
+# This routing handles submission of user reviews
 @app.route('/process_submission', methods=['POST'])
 def process():
 
@@ -194,16 +194,6 @@ def process():
             + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
     
     return redirect(redirectUrl, code=303)
-
-
-# Top 5 Page
-@app.route('/top')
-def top():
-    return render_template(
-        'top.html',
-        nav=nav,
-        serviceUrl=serviceUrl
-    )
 
 
 # Search Results Page
@@ -237,7 +227,7 @@ def search():
     # Build results list
     rawResults = cities + states + countries
     resultsWithLink = []
-    for locationId, city, state, country in rawResults:
+    for locationId, city, state, country, searchTerm in rawResults:
         url = '/location?city=' + city.replace(' ', '%20') + '&state=' \
         + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
         resultsWithLink.append((locationId, city, state, country, url))
@@ -307,7 +297,7 @@ def location():
     locationId = cur.execute('SELECT id FROM locations WHERE city = (?)', (city,)).fetchall()[0]
 
     # Get all reviews for this location and analyze their sentiment scores
-    reviews = cur.execute('SELECT review FROM reviews WHERE locationId = (?)', locationId).fetchall()
+    reviews = cur.execute('SELECT review, name, id FROM reviews WHERE locationId = (?)', locationId).fetchall()
     conn.close()
     
     concatReviews = ''
@@ -338,6 +328,35 @@ def location():
         reviews=reviews,
         imgUrl=imgUrl
     )
+
+
+# Delete a review
+@app.route('/deleteReview', methods=['POST'])
+def deleteReview():
+    # TODO: Validate id
+    id = request.json['id']
+    conn = sqlite3.connect('app.db')
+    cur = conn.cursor()
+    success = cur.execute('DELETE FROM reviews WHERE id = (?)', (id,))
+    conn.commit()
+    conn.close()
+    return make_response({'success':True, 'id':id}, 200)
+
+
+# Update a review
+@app.route('/update_review', methods=['POST'])
+def updateReview():
+    # TODO: Validate id
+    id = request.json['id']
+    newReview = request.json['newReview']
+
+    conn = sqlite3.connect('app.db')
+    cur = conn.cursor()
+    success = cur.execute('UPDATE reviews SET review = (?) WHERE id = (?)', (newReview, id))
+    conn.commit()
+    conn.close()
+
+    return make_response({'success':True, 'id':id, 'newReview':newReview}, 200)
 
 
 # Sentiment/Text Analysis GUI

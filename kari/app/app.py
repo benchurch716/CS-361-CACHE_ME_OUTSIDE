@@ -230,7 +230,8 @@ def search():
     for locationId, city, state, country, searchTerm in rawResults:
         url = '/location?city=' + city.replace(' ', '%20') + '&state=' \
         + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
-        resultsWithLink.append((locationId, city, state, country, url))
+        imgUrl = getImgUrl(searchTerm)
+        resultsWithLink.append((locationId, city, state, country, url, imgUrl))
     print(resultsWithLink)
 
     # TODO: Remove duplicates from list (eg, New York City, New York would appear twice if

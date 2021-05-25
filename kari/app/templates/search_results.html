@@ -4,6 +4,9 @@
 
 {% block content %}
 {% for location in results %}
+    <a href="{{ location[4] }}">
+        <img class="thumbnail" src="{{ location[5] }}" alt="{{ location[1] }}">
+    </a>
     <a href="{{ location[4] }}">{{ location[1] }}, 
     {% if not location[2] == None %}
         {{location [2] }}, 

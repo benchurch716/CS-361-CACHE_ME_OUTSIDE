@@ -4,7 +4,7 @@
 {% block header %}<h2>{{ city }}</h2>{% endblock %}
 
 {% block content %}
-<img class="imgLocMain" src="{{ imgUrl }}" alt="image coming soon">
+<img class="imgLocMain" src="{{ imgUrl }}">
 <a class="btnLinkToSubmitPage" href="/review">Submit a Review</a>
 
 <div class="fullSizeContainer">
@@ -29,9 +29,9 @@
     {% for review in reviews %}
     <p id="container_review{{ review[2] }}">
         <span id="reviewText{{ review[2] }}">{{ review[0] }}</span>
-        <span id="reviewUser{{ review[2] }}">{{ review[1] }}</span>
-        <button onclick="editReview({{ review[2] }})">edit</button>
-        <button onclick="deleteReview({{ review[2] }})">delete</button>
+        <button class="btnEditReview" onclick="editReview({{ review[2] }})">edit</button>
+        <button class="btnDeleteReview" onclick="deleteReview({{ review[2] }})">delete</button><br>
+        <span class="reviewerName" id="reviewUser{{ review[2] }}">{{ review[1] }}</span>
     </p>
     {% endfor %}
 </div>

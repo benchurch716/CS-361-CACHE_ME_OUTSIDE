@@ -69,8 +69,16 @@ footer{
     font-size: 1.1em;
 }
 
+/* Style thumbnail images on search results page */
+.thumbnail {
+    max-width: 10em;
+    border-radius: 1em;
+    padding: 0.5em;
+}
+
 /* Style the link to the Submit Review page */
 .btnLinkToSubmitPage{
+    margin-left: 2em;
     color: #ffffff;
     background-color: #560BAD;
     padding: 1.5em 2em;
@@ -84,12 +92,43 @@ footer{
     text-decoration: none;
 }
 
+/* Style Edit/Delete Review buttons */
+.btnEditReview {
+    margin-left: 2em;
+    background-color: #ffffff;
+    color: #F72585;
+    border: 1px solid #F72585;
+}
+
+.btnDeleteReview {
+    background-color: #ffffff;
+    color: #F72585;
+    border: 1px solid #F72585;
+}
+
+.btnEditReview:hover {
+    background-color: #F72585;
+    color: #ffffff;
+    border: 1px solid #F72585;
+}
+
+.btnDeleteReview:hover {
+    background-color: #F72585;
+    color: #ffffff;
+    border: 1px solid #F72585;
+}
+
+/* Style Reviewer Name */
+.reviewerName{
+    font-style: italic;
+}
+
+/* Style Main Image on Location page */
 .imgLocMain{
     border-radius: 0.5em;
     max-width: 30%;
     height: auto;
 }
-
 
 /* Style Home Page Featured Locations */
 .featLoc{

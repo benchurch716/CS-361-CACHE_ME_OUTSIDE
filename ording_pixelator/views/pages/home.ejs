@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body {background-color: black;}
+    body {background-color: lavender;}
     h1   {
-        color: red;
+        color: black;
         font-family:georgia,garamond,serif;font-size:38px;font-style:bold;
         margin: auto;
         text-align: center;
     }
     form {
-        color: red;
+        color: black;
         font-family:georgia,garamond,serif;font-size:38px;font-style:bold;
         margin: auto;
         text-align: center;
@@ -35,6 +35,9 @@
         </select>>
         <input type="submit" value="Results" style="font-family:georgia,garamond,serif;font-size:18px;font-style:bold;">
     </form>
-    <h1>A++</h1>
+    <form action="/apisearch" method="POST">
+        <label for="searchterm">Search for something</label>
+        <input type="text" id="searchterm" name="searchterm">
+    </form>
  </body>
 </html>

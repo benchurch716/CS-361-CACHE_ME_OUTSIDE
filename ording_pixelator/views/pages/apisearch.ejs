@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {background-color: lavender;}
+    h1   {
+        color: black;
+        font-family:georgia,garamond,serif;font-size:38px;font-style:bold;
+        margin: auto;
+        text-align: center;
+    }
+    form {
+        color: black;
+        font-family:georgia,garamond,serif;font-size:38px;font-style:bold;
+        margin: auto;
+        text-align: center;
+    }
+    </style>
+  <title>Pixelator</title>
+ </head>
+ <body>
+    <h1>Image Pixelator</h1>
+    <form action="/results" method="POST">
+        <label for="imagename">Image URL</label>
+        <% search.forEach(function(item){ %>
+        <input type="text" id="imagename" name="imagename" value="<%= item.url %>"><br><br>
+        <%});%>
+        <label for="pixel_level">How pixelated would you like the image?</label>
+        <select name="pixel_level" id="pixel_level">
+            <option value=5>Minimum</option>
+            <option value=20>Minimum-Medium</option>
+            <option value=50>Medium</option>
+            <option value=100>Medium-Maximum</option>
+            <option value=200>Maximum</option>
+        </select>>
+        <input type="submit" value="Results" style="font-family:georgia,garamond,serif;font-size:18px;font-style:bold;">
+    </form>
+ </body>
+</html>

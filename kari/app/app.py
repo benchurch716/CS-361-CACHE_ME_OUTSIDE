@@ -79,10 +79,10 @@ def getMostFrequent(text, count):
 def execSelectQuery(dbName, query, qParams):
     conn = sqlite3.connect(dbName)
     cur = conn.cursor()
-    print('query is :' + query, flush=True)
-    for item in qParams:
-        print(item, flush=True)
-    result = cur.execute(query, qParams).fetchall()
+    if qParams != None:
+        result = cur.execute(query, qParams).fetchall()
+    else:
+        result = cur.execute(query).fetchall()
     conn.close()
     return result
 
@@ -116,6 +116,7 @@ searchResultsUrl = '/search_results'
 @app.route('/')
 def home():
     form = searchForm()
+    pics = [('find.png', '/browse'), ('share.png', '/review')]
 
     # TODO: Make function to choose random featured locations and retrieve their data
     #       from DB.
@@ -137,7 +138,8 @@ def home():
         nav=nav,
         form=form,
         serviceUrl=serviceUrl,
-        featuredLocs=featuredLocs
+        featuredLocs=featuredLocs,
+        pics=pics
     )
 
 

@@ -154,3 +154,33 @@ h6{
     font-style: italic;
     font-size: 80%;
 }
+
+/* Slideshow */
+.slide {
+    display:none;
+}
+
+.slide img {
+    display:inline;
+    margin-left: auto;
+    margin-right: auto;
+    max-height: 550px;
+    max-width: 80%;
+}
+
+.prev, .next {
+    display:inline;
+    cursor: pointer;
+    user-select: none;
+    width: auto;
+    padding: 0.5em;
+    border-radius: 4px; 
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 2em;
+    transition: 0.6s ease;
+  }
+  
+  .prev:hover, .next:hover {
+    background-color: rgba(0,0,0,0.8);
+  }

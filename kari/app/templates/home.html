@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-{% block script %}<script src="{{url_for('static', filename='script.js')}}"></script>{% endblock %}
+{% block script %}<script src="{{url_for('static', filename='slideshow.js')}}"></script>{% endblock %}
 {% block title %}Home{% endblock %}
 {% block header %}{% endblock %}
 
 {% block content %}
 
+<br>
 <div class=homeSearchContainer>
     <form method="post" action={{ form.actionUrl }}>
         {{ form.searchText(size=50) }}
@@ -12,7 +13,20 @@
     </form>
 </div>
 <br>
-
+<br>
+<div>
+    <a class="prev" onclick="minusSlides()">&#10094;</a>
+    {% for pic in pics %}
+    <span id="slide-{{ loop.index }}" class="slide">
+        <a  href="{{ pic[1] }}">
+        <img src="static/{{ pic[0] }}">
+        </a>
+    </span>
+    {% endfor %}
+    <a class="next" onclick="plusSlides()">&#10095;</a>
+</div>
+<br>
+<br>
 <div class="featContainer">
     <h3>Featured Locations</h3>
     {% for location in featuredLocs %}

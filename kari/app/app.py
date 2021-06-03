@@ -10,6 +10,8 @@ import sqlite3
 import string
 from wiki import *
 
+DB = 'app.db'
+
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
@@ -19,6 +21,7 @@ class searchForm(FlaskForm):
     searchText = StringField('Search')
     actionUrl = '/search_results'
 
+
 class reviewForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     city = SelectField('City', validators=[DataRequired()], validate_choice=False)
@@ -26,7 +29,8 @@ class reviewForm(FlaskForm):
     country = SelectField('Country', validators=[DataRequired()])
     review = TextAreaField('Review', validators=[DataRequired()])
 
-class apiForm(FlaskForm):
+
+class serviceForm(FlaskForm):
     inputText = TextAreaField('Input Text', validators=[DataRequired()])
 
 
@@ -71,14 +75,30 @@ def getMostFrequent(text, count):
     return frequency.most_common(count)
 
 
+# Execute SELECT Query
+def execSelectQuery(dbName, query, qParams):
+    conn = sqlite3.connect(dbName)
+    cur = conn.cursor()
+    print('query is :' + query, flush=True)
+    for item in qParams:
+        print(item, flush=True)
+    result = cur.execute(query, qParams).fetchall()
+    conn.close()
+    return result
+
+
+# Execute INSERT Query
+def execInsertQuery(dbName, query, qParams):
+    conn = sqlite3.connect(dbName)
+    cur = conn.cursor()
+    cur.execute(query, qParams)    
+    conn.commit()
+    conn.close()   
+
+
 # Get search term for a given location
 def getWikiSearchTerm(id):
-    conn = sqlite3.connect('app.db')
-    cur = conn.cursor()
-    print('id is : ' + str(id), flush=True)
-    searchTerm = cur.execute('SELECT searchTerm FROM locations WHERE id = (?)', id).fetchall()
-    conn.close()
-    return searchTerm
+    return execSelectQuery(DB, 'SELECT searchTerm FROM locations WHERE id = (?)', id)
 
 
 # Navigation Bar - Label : Route
@@ -95,24 +115,20 @@ searchResultsUrl = '/search_results'
 # Home Page
 @app.route('/')
 def home():
-
     form = searchForm()
 
     # TODO: Make function to choose random featured locations and retrieve their data
     #       from DB.
     # Each location needs city, state, country, img link, page link
-    featuredLocs = [FeaturedLoc('Redmond', 'WA', 'United States'), \
+    featuredLocs = [
         FeaturedLoc('Corvallis', 'OR', 'United States'), \
+        FeaturedLoc('Redmond', 'WA', 'United States'), \
         FeaturedLoc('Grays Point', 'NSW', 'Australia')
-        ]
+        ]      
 
-    for loc in featuredLocs:
-
-        conn = sqlite3.connect('app.db')
-        cur = conn.cursor()
-
-        # Get locationId based on URL query string parameters
-        locationId = cur.execute('SELECT id FROM locations WHERE city = (?)', (loc.city,)).fetchall()[0]        
+    for loc in featuredLocs: 
+        locationId = execSelectQuery(DB, 'SELECT id FROM locations WHERE city = (?)', (loc.city,))[0]
+        print('locationId is ' + str(locationId), flush=True)
         searchTerm = getWikiSearchTerm(locationId)
         loc.img = getImgUrl(searchTerm)
 
@@ -125,37 +141,24 @@ def home():
     )
 
 
+# Initialize dropdown choices
+def initializeDropdown(field):
+    choices = []
+    queryResults = execSelectQuery(DB, 'SELECT DISTINCT ' + field + ' FROM locations', None)
+    for loc in queryResults:
+        choices.append((loc[0], loc[0]))
+    choices.sort()
+    choices.insert(0, ('', ''))             # Insert blank at top of menu
+    return choices
+
+
 # Submit a Review Page
 @app.route('/review')
 def review():
-
-    # Connect to database and create cursor
-    conn = sqlite3.connect('app.db')
-    cur = conn.cursor()
-
-    # Create form
     form = reviewForm()
-    
-    # Initialize form dropdown choices
-    form.city.choices = []
-    queryResults = cur.execute('SELECT DISTINCT city FROM locations').fetchall()
-    for city in queryResults:
-        form.city.choices.append((city[0], city[0]))
-    form.city.choices.sort()        
-
-    form.state.choices = []
-    queryResults = cur.execute('SELECT DISTINCT state FROM locations').fetchall()
-    for state in queryResults:
-        form.state.choices.append((state[0], state[0]))
-    form.state.choices.sort()
-    #form.state.choices.insert(0, '')        # Insert blank choice, since state is optional
-
-    form.country.choices = []
-    queryResults = cur.execute('SELECT DISTINCT country FROM locations').fetchall()
-    for country in queryResults:
-        form.country.choices.append((country[0], country[0]))
-    form.country.choices.sort()                        
-
+    form.city.choices = initializeDropdown('city')
+    form.state.choices = initializeDropdown('state')
+    form.country.choices = initializeDropdown('country')
     return render_template(
         'review.html',
         nav=nav,
@@ -167,17 +170,14 @@ def review():
 # This routing handles submission of user reviews
 @app.route('/process_submission', methods=['POST'])
 def process():
-
-    form = reviewForm()
-    conn = sqlite3.connect('app.db')
-    cur = conn.cursor()    
+    form = reviewForm()  
 
     # Retrieve id of location that the user specified
     city = form.city.data
     state = form.state.data
     country = form.country.data
-    locationId = cur.execute('SELECT id FROM locations WHERE city = (?) AND state = (?) \
-        AND country = (?)', (city, state, country)).fetchall()
+    locationId = execSelectQuery(DB, 'SELECT id FROM locations WHERE city = (?) AND state = (?) \
+        AND country = (?)', (city, state, country))
     
     # Check for location validity
     if locationId == []:
@@ -185,10 +185,8 @@ def process():
         abort(404)
 
     # Add review to database and close connection
-    cur.execute("INSERT INTO reviews (locationId, name, review) VALUES (?, ?, ?)", \
+    executeInsertQuery("INSERT INTO reviews (locationId, name, review) VALUES (?, ?, ?)", \
         (locationId[0][0], form.name.data, form.review.data))
-    conn.commit()
-    conn.close()
 
     redirectUrl = '/location?city=' + city.replace(' ', '%20') + '&state=' \
             + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
@@ -199,7 +197,6 @@ def process():
 # Search Results Page
 @app.route('/search_results', methods=['GET', 'POST'])
 def search():
-
     form = searchForm()
 
     # Connect to database and create cursor
@@ -216,23 +213,24 @@ def search():
 
     # Perform search of cities, states and countries columns
     # TODO: Make this work with full state name. Currently works only with state abbr.
-    # ie, 'OR' returns a match, whereas 'Oregon' does not    
-    cities = cur.execute( 'SELECT * FROM locations WHERE city LIKE (?)', \
-        (searchText,)).fetchall()
-    states = cur.execute('SELECT * FROM locations WHERE state LIKE (?)', \
-         (searchText,)).fetchall()      
-    countries = cur.execute('SELECT * FROM locations WHERE country LIKE (?)', \
-         (searchText,)).fetchall()
+    # ie, 'OR' returns a match, whereas 'Oregon' does not
+    queries = (
+        'SELECT * FROM locations WHERE city LIKE (?)',
+        'SELECT * FROM locations WHERE state LIKE (?)',
+        'SELECT * FROM locations WHERE country LIKE (?)'
+    )
+    cities = execSelectQuery(DB, queries[0], searchText)
+    states = execSelectQuery(DB, queries[1], searchText)
+    countries = execSelectQuery(DB, queries[2], searchText)
     
     # Build results list
     rawResults = cities + states + countries
     resultsWithLink = []
     for locationId, city, state, country, searchTerm in rawResults:
         url = '/location?city=' + city.replace(' ', '%20') + '&state=' \
-        + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
+            + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
         imgUrl = getImgUrl(searchTerm)
         resultsWithLink.append((locationId, city, state, country, url, imgUrl))
-    print(resultsWithLink)
 
     # TODO: Remove duplicates from list (eg, New York City, New York would appear twice if
     # searching for 'New York'. This is unwanted behavior.)
@@ -253,25 +251,14 @@ def search():
 # Browse Page
 @app.route('/browse')
 def browse():
-
-    # Connect to database and create cursor
-    conn = sqlite3.connect('app.db')
-    cur = conn.cursor()
-
-    # Return list of all locations in database
-    locations = cur.execute('SELECT * FROM locations').fetchall()
+    locations = execSelectQuery(DB, 'SELECT * FROM locations', None)
 
     # Add link to locations
     locationsWithLink = []
     for locationId, city, state, country, searchTerm in locations:
         url = '/location?city=' + city.replace(' ', '%20') + '&state=' \
-        + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
+            + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
         locationsWithLink.append((locationId, city, state, country, url))
-    print(locationsWithLink)
-
-    # Close db connection
-    conn.commit()                           
-    conn.close()
     
     return render_template(
         'browse.html',
@@ -283,23 +270,18 @@ def browse():
 # Location Page
 @app.route('/location', methods=['GET', 'POST'])
 def location():
-
     submitURL = nav.get('Submit a Review')
-
     city = request.args.get('city')
     state = request.args.get('state')
     country = request.args.get('country')
 
-    # Connect to database and create cursor
-    conn = sqlite3.connect('app.db')
-    cur = conn.cursor()
-
     # Get locationId based on URL query string parameters
-    locationId = cur.execute('SELECT id FROM locations WHERE city = (?)', (city,)).fetchall()[0]
+    query = 'SELECT id FROM locations WHERE city = (?)'
+    locationId = execSelectQuery(DB, query, (city,))[0]
 
     # Get all reviews for this location and analyze their sentiment scores
-    reviews = cur.execute('SELECT review, name, id FROM reviews WHERE locationId = (?)', locationId).fetchall()
-    conn.close()
+    query = 'SELECT review, name, id FROM reviews WHERE locationId = (?)'
+    reviews = execSelectQuery(DB, query, locationId)
     
     concatReviews = ''
     for review in reviews:
@@ -350,36 +332,31 @@ def updateReview():
     # TODO: Validate id
     id = request.json['id']
     newReview = request.json['newReview']
-
     conn = sqlite3.connect('app.db')
     cur = conn.cursor()
     success = cur.execute('UPDATE reviews SET review = (?) WHERE id = (?)', (newReview, id))
     conn.commit()
     conn.close()
-
     return make_response({'success':True, 'id':id, 'newReview':newReview}, 200)
 
 
 # Sentiment/Text Analysis GUI
+# See https://github.com/cjhutto/vaderSentiment for more information on how the
+# VADER tool (included in nltk library) calculates sentiment analysis scores
 @app.route('/service', methods=['GET', 'POST'])
 def service():
+    form = serviceForm()
 
-    form = apiForm()
-
-    # See https://github.com/cjhutto/vaderSentiment for more information on how the
-    # VADER tool (included in nltk library) calculates sentiment analysis scores
     descriptions = {
         'neg': 'Proportion of the text that has negative sentiment',
         'neu': 'Proportion of the text that is neutral',
         'pos': 'Proportion of the text that has positive sentiment',
         'compound': 'A normalized, weighted composite score for the text overall. Ranges \
                     between -1 (most negative) to 1 (most positive)',
-        'sentiment': 'Overall sentiment, based on compound score. Below -0.05 is negative, \
-                    -0.05 to 0.05 is neutral, and greater than 0.05 is positive',
-        'word_count': 'Word Count',
+        'sentiment': 'Overall sentiment, based on compound score. Below -0.05 is negative', 
+        'word_count': 'Word Count', 
         'most_frequent': 'Most frequently used words and number of appearances in the text'
     }
-
     displayResults = False
     txtInput = ''
     scores = {
@@ -391,7 +368,6 @@ def service():
     sentiment = '-'
     wordCount = '-'
     mostFrequent = '-'
-
 
     if request.method == 'POST':
         displayResults = True
@@ -427,7 +403,6 @@ def pageNotFound(e):
 # API implementation    
 @app.route('/api', methods=['GET', 'POST'])
 def api():
-
     # Check for request type, content type
     if request.method == 'GET':
         return make_response({'error': 'Method Not Allowed'}, 405)

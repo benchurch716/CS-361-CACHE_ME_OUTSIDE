@@ -12,7 +12,7 @@ def getImgUrl(searchTerm):
     return imgUrl
 
 def getLocationText(searchTerm):
-    url = 'http://flip3.engr.oregonstate.edu:2405/api'
+    url = 'http://flip3.engr.oregonstate.edu:2446/api'
     jsonObj = {}
     jsonObj['wiki'] = searchTerm
     responseBody = requests.post(url, json=jsonObj).text

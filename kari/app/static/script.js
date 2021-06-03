@@ -2,7 +2,6 @@
 
 // Delete a review. Called by Delete button.
 function deleteReview(id) {
-
     // Ask user to confirm deletion
     var proceed = confirm('You\'re about to delete a review. Click Ok to continue.');
     if (!proceed) {
@@ -40,7 +39,6 @@ function deleteReview(id) {
 
 // Return the location page to its previous state. Called by Cancel button.
 function cancelEdit(id) {
-
     spanId = "reviewText" + id;
     divId = "formDiv" + id;
     originalSpan = document.getElementById(spanId);
@@ -54,7 +52,6 @@ function cancelEdit(id) {
 
 // Display form allowing client to update a review. Called by Edit button.
 function editReview(id) {    
-
     // Get and store review text
     var reviewSpan = document.getElementById("reviewText" + id);
     var reviewText = reviewSpan.innerHTML;
@@ -82,7 +79,6 @@ function editReview(id) {
 
 // Send review changes to server. Called by Submit button.
 function saveChanges(id) {
-
     // Get new review text
     var textAreaId = "newReview" + id;
     var textAreaElement = document.getElementById(textAreaId);

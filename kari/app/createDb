@@ -7,7 +7,6 @@ import sqlite3
 # Create DB file and set up connection
 if os.path.exists('app.db'):
 	os.remove('app.db')
-
 con = sqlite3.connect('app.db')
 cur = con.cursor()
 cur.execute('''PRAGMA foreign_keys = 1''')
@@ -19,14 +18,12 @@ cur.execute('''CREATE TABLE locations(
 	state text, 
 	country text NOT NULL,
 	searchTerm text NOT NULL)''')
-
 cur.execute('''CREATE TABLE reviews(
 	id integer PRIMARY KEY,
 	locationId integer,
 	name text NOT NULL,
 	review text NOT NULL,
 	FOREIGN KEY(locationId) REFERENCES locations(id))''')
-
 cur.execute('''CREATE TABLE stateAbbrs(
 	id integer PRIMARY KEY,
 	nameLong text NOT NULL,

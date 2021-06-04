@@ -115,7 +115,7 @@ searchResultsUrl = '/search_results'
 # Home Page
 @app.route('/')
 def home():
-    form = searchForm()
+    searchBox = searchForm()
     pics = [('find.png', '/browse'), ('share.png', '/review')]
 
     # TODO: Make function to choose random featured locations and retrieve their data
@@ -136,7 +136,7 @@ def home():
     return render_template(
         'home.html',
         nav=nav,
-        form=form,
+        searchBox=searchBox,
         serviceUrl=serviceUrl,
         featuredLocs=featuredLocs,
         pics=pics
@@ -201,17 +201,9 @@ def process():
 def search():
     form = searchForm()
 
-    # Connect to database and create cursor
-    conn = sqlite3.connect('app.db')
-    cur = conn.cursor()
-
     # Initialize search text
     searchText = form.searchText.data
     searchText = '%' + searchText + '%'
-
-    # Override default case-sensitive LIKE
-    cur.execute('PRAGMA case_sensitive_like=OFF')
-    conn.commit()
 
     # Perform search of cities, states and countries columns
     # TODO: Make this work with full state name. Currently works only with state abbr.
@@ -221,9 +213,9 @@ def search():
         'SELECT * FROM locations WHERE state LIKE (?)',
         'SELECT * FROM locations WHERE country LIKE (?)'
     )
-    cities = execSelectQuery(DB, queries[0], searchText)
-    states = execSelectQuery(DB, queries[1], searchText)
-    countries = execSelectQuery(DB, queries[2], searchText)
+    cities = execSelectQuery(DB, queries[0], (searchText,))
+    states = execSelectQuery(DB, queries[1], (searchText,))
+    countries = execSelectQuery(DB, queries[2], (searchText,))
     
     # Build results list
     rawResults = cities + states + countries
@@ -236,11 +228,6 @@ def search():
 
     # TODO: Remove duplicates from list (eg, New York City, New York would appear twice if
     # searching for 'New York'. This is unwanted behavior.)
-
-    # Reset case-sensitive LIKE back to default, then close db connection
-    cur.execute('PRAGMA case_sensitive_like=ON')
-    conn.commit()                           
-    conn.close()
 
     return render_template(
         'search_results.html',
@@ -260,7 +247,8 @@ def browse():
     for locationId, city, state, country, searchTerm in locations:
         url = '/location?city=' + city.replace(' ', '%20') + '&state=' \
             + state.replace(' ', '%20') + '&country=' + country.replace(' ', '%20')
-        locationsWithLink.append((locationId, city, state, country, url))
+        imgUrl = getImgUrl(searchTerm)
+        locationsWithLink.append((locationId, city, state, country, url, imgUrl))
     
     return render_template(
         'browse.html',
@@ -289,6 +277,7 @@ def location():
     for review in reviews:
         concatReviews = concatReviews + review[0] + ' '
     scores = SentimentIntensityAnalyzer().polarity_scores(concatReviews)
+    sentiment = getSentiment(scores['compound'])
     reviewCount = len(reviews)
 
     # TODO: Fix this
@@ -309,6 +298,7 @@ def location():
         locationText=locationText,
         submitURL=submitURL,
         scores=scores,
+        sentiment=sentiment,
         reviewCount=reviewCount,
         reviews=reviews,
         imgUrl=imgUrl

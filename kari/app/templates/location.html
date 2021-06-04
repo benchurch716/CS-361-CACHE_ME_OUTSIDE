@@ -7,13 +7,17 @@
 <img class="imgLocMain" src="{{ imgUrl }}">
 <a class="btnLinkToSubmitPage" href="/review">Submit a Review</a>
 
+
+
 <div class="fullSizeContainer">
+    <h4>Our users feel {{ sentiment }} about {{ city }}.</h4>
     <table class="locationScores">
         <tr>
             <th>Destination Scores:</th>
             <td>Positivity: {{ scores.get('pos') }}</td>
             <td>Neutrality: {{ scores.get('neu') }}</td>
             <td>Negativity: {{ scores.get('neg') }}</td>
+            <td>Compound: {{ scores.get('compound') }}</td>            
             <td>Total Reviews: {{ reviewCount }}</td>
         </tr>
     </table>

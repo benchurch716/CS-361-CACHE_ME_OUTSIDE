@@ -10,6 +10,7 @@ if os.path.exists('app.db'):
 con = sqlite3.connect('app.db')
 cur = con.cursor()
 cur.execute('''PRAGMA foreign_keys = 1''')
+cur.execute('''PRAGMA case_sensitive_like=OFF''')
 
 # Create Tables
 cur.execute('''CREATE TABLE locations(

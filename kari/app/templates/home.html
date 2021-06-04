@@ -6,15 +6,7 @@
 {% block content %}
 
 <br>
-<div class=homeSearchContainer>
-    <form method="post" action={{ form.actionUrl }}>
-        {{ form.searchText(size=50) }}
-        <input type="submit" value="Search">
-    </form>
-</div>
-<br>
-<br>
-<div>
+<div id="slideContainer">
     <a class="prev" onclick="minusSlides()">&#10094;</a>
     {% for pic in pics %}
     <span id="slide-{{ loop.index }}" class="slide">
@@ -25,6 +17,8 @@
     {% endfor %}
     <a class="next" onclick="plusSlides()">&#10095;</a>
 </div>
+<br>
+<br>
 <br>
 <br>
 <div class="featContainer">

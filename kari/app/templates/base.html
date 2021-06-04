@@ -16,6 +16,14 @@
       <a href={{ route }}>{{ label }}</a>
     {% endfor %}
     <!-- <span class=navSearch>Search Box Goes Here</span> -->
+    {% if searchBox %}
+    <div class=searchContainer>
+      <form method="post" action={{ searchBox.actionUrl }}>
+          {{ searchBox.searchText(size=50) }}
+          <input type="submit" value="Search">
+      </form>
+    </div>
+    {% endif %}    
   </nav>
 
   <section class="content">

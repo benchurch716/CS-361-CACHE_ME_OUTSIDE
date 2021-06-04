@@ -19,9 +19,7 @@ app.use(express.static('public'));
 app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
 
 cloudinary.config({ 
-    cloud_name: 'ordingi', 
-    api_key: '515673646318212', 
-    api_secret: 'c2IffhnqnncwB15wgLvFINyesTE' 
+    // credentials for cloudinary go here
   });
 
 const data = []

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CS361 Project</title>
+    <script src="wiki_scrapper.js"></script>
+</head>
+<body>
+<h1>CS361 Project</h1>
+
+<div>
+    <p>
+        Welcome to the Wikipedia Summary Scraper! Search for a term currently found in Wikipedia and return:
+        <ul>
+            <li>Summary of the article</li>
+            <li>An overall positive or negative connotation, based on the summary</li>
+        </ul>
+
+        All you need to do is enter a valid Wikipedia search term and click on the submit button
+    </p>
+</div>
+
+
+<form id="userForm">
+    <label>Wikipedia Link</label>
+    <input type='text' name='wikiLink' id='wikiLink'>
+
+    <input type='submit' class = 'button' id='userSubmit'>
+</form>
+<div id="wikiSummary", style="visibility: hidden">
+    <h2>Wikipedia Summary:</h2>
+        <p id="resultsHeader"></p>
+</div>
+<div id ="overallConnotation", style="visibility: hidden">
+    <h2>Overall Connotation:</h2>
+    <p id="resultsConnotation"></p>
+</div>
+<div>
+    <button type="button" id ="retryButton" style="visibility:hidden">Scrape Something Else!</button>
+</div>
+<br>
+<div>
+    <p>Curious about the process? Click here</p>
+</div>
+</body>
+</html>

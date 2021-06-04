@@ -4,33 +4,33 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body {background-color: black;}
+    body {background-color: lavender;}
     h1   {
-        color: red;
+        color: black;
         font-family:georgia,garamond,serif;font-size:38px;font-style:bold;
         margin: auto;
         text-align: center;
     }
     div {
-      color: blue;
+      color: black;
     }
     table {
       text-align: center;
-      color: blue;
+      color: black;
     }
     </style>
   <title>Pixelator</title>
  </head>
  <body>
      <h1>Results of the Pixelization</h1>
-     <form action="/send_DL" method="GET">
+     <form action="/restart" method="GET">
         <input type="submit" value="Continue" style="font-family:georgia,garamond,serif;font-size:18px;font-style:bold;">
     </form>
     <div>
       <% data.forEach(function(item){ %>
-        <img style="height: 200px; width: 200px;" src="<%= item.old_image %>">
+        <img src="<%= item.old_image %>">
         <div>Old Image</div>
-        <img style="height: 200px; width: 200px;" src="<%= item.new_image %>">
+        <img src="<%= item.new_image %>">
         <div>New Image</div>
       <%});%>
     </div>
